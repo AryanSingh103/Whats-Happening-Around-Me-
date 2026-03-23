@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# What's Happening Around Me? 🌍
 
-## Getting Started
+A simple, fast, single-page Next.js application that explains local environmental conditions in engaging, youth-friendly language using AI.
 
-First, run the development server:
+## Features
+- **Simple UI**: Just enter your location and pick a concern (Air Pollution, Heat Wave, etc.)
+- **Real-Time Data**: Fetches actual temperature, humidity, wind, and AQI.
+- **AI Explanations**: Uses OpenAI to translate hard data into conversational, relatable analogies.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Tech Stack
+- Frontend & Backend: [Next.js 16](https://nextjs.org/) (App Directory)
+- Styling: [Tailwind CSS v4](https://tailwindcss.com/)
+- API Routes: Next.js API Handlers
+- Fonts: Google Inter (via `next/font`)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Setup Instructions
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. **Install Dependencies**
+   ```bash
+   npm install
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. **Configure Environment Variables**
+   Open `.env.local` and add your API keys:
+   ```env
+   OPENWEATHERMAP_API_KEY=your_key_here
+   WAQI_API_KEY=your_key_here
+   OPENAI_API_KEY=your_key_here
+   ```
+   *Note: If you don't add keys immediately, the app will fall back to dummy data so you can still test the UI.*
 
-## Learn More
+3. **Run the Development Server**
+   ```bash
+   npm run dev
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+4. **Open in Browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## API Providers
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **OpenWeatherMap**: Used for temperature, wind, and general weather descriptions. Get a free key at [openweathermap.org](https://openweathermap.org/api).
+2. **World Air Quality Project (WAQI)**: Used for AQI data. Get a free token at [aqicn.org/data-platform/token/](https://aqicn.org/data-platform/token/).
+3. **OpenAI**: Used to generate the youth-friendly explanations (uses `gpt-4o-mini`). Get a key at [platform.openai.com](https://platform.openai.com/).
