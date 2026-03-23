@@ -33,6 +33,18 @@ interface EnvironmentData {
   description: string;
 }
 
+interface SimMetric {
+  name: string;
+  value: string;
+  context: string;
+  trend: 'bad' | 'good' | 'neutral';
+}
+
+interface SimData {
+  story: string;
+  metrics: SimMetric[];
+}
+
 export default function Home() {
   const [activeTab, setActiveTab] = useState<'current' | 'future'>('current');
 
@@ -52,7 +64,7 @@ export default function Home() {
   const [simTrajectory, setSimTrajectory] = useState(2); // Default to Current Path
   const [simLoading, setSimLoading] = useState(false);
   const [simError, setSimError] = useState('');
-  const [simStory, setSimStory] = useState('');
+  const [simData, setSimData] = useState<SimData | null>(null);
   const [simFutureYear, setSimFutureYear] = useState<number | null>(null);
 
   // --- Current Tab Handler ---
@@ -99,7 +111,7 @@ export default function Home() {
 
     setSimLoading(true);
     setSimError('');
-    setSimStory('');
+    setSimData(null);
     setSimFutureYear(null);
 
     const trajectoryLabel = TRAJECTORIES.find(t => t.value === simTrajectory)?.label;
@@ -119,7 +131,7 @@ export default function Home() {
 
       if (!res.ok) throw new Error('Failed to generate simulation. Please check API keys.');
       const json = await res.json();
-      setSimStory(json.story);
+      setSimData(json.data);
       setSimFutureYear(json.futureYear);
     } catch (err: any) {
       setSimError(err.message || 'Something went wrong.');
@@ -335,20 +347,39 @@ export default function Home() {
 
           {simError && <div className="w-full bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl mb-8 text-center">{simError}</div>}
           
-          {simLoading && !simStory && (
-            <div className="w-full h-32 rounded-xl loading-shimmer"></div>
+          {simLoading && !simData && (
+            <div className="w-full space-y-4"><div className="h-24 rounded-xl loading-shimmer"></div><div className="h-40 rounded-xl loading-shimmer"></div></div>
           )}
 
-          {simStory && (
-            <div className="bg-purple-900/10 border border-purple-500/30 p-6 md:p-8 rounded-2xl relative overflow-hidden animate-fade-in mt-6 shadow-[0_0_40px_rgba(168,85,247,0.1)]">
-              <div className="absolute top-0 left-0 w-1 h-full bg-purple-500"></div>
-              <div className="flex items-start gap-4">
-                <div className="bg-purple-500 text-white p-2 rounded-lg shrink-0">🔮</div>
-                <div>
-                  <h3 className="text-xl font-bold text-white mb-3">Life in {simFutureYear} (At Age {simAge})</h3>
-                  <p className="text-purple-100/90 leading-relaxed text-lg whitespace-pre-wrap">{simStory}</p>
+          {simData && (
+            <div className="space-y-6 animate-fade-in mt-6">
+              <div className="bg-purple-900/10 border border-purple-500/30 p-6 md:p-8 rounded-2xl relative overflow-hidden shadow-[0_0_40px_rgba(168,85,247,0.1)]">
+                <div className="absolute top-0 left-0 w-1 h-full bg-purple-500"></div>
+                <div className="flex items-start gap-4">
+                  <div className="bg-purple-500 text-white p-2 rounded-lg shrink-0">🔮</div>
+                  <div className="w-full">
+                    <h3 className="text-xl font-bold text-white mb-3">Life in {simFutureYear} (At Age {simAge})</h3>
+                    <p className="text-purple-100/90 leading-relaxed text-lg whitespace-pre-wrap">{simData.story}</p>
+                  </div>
                 </div>
               </div>
+
+              {simData.metrics && simData.metrics.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {simData.metrics.map((metric, idx) => (
+                    <div key={idx} className="bg-[var(--color-bg-card)] border border-[var(--color-border)] p-5 rounded-2xl relative overflow-hidden group hover:border-purple-500/50 transition-all shadow-lg hover:shadow-purple-500/5">
+                      <div className="flex justify-between items-start mb-2">
+                        <p className="text-sm font-medium text-[var(--color-text-muted)] line-clamp-1">{metric.name}</p>
+                        {metric.trend === 'bad' && <span className="text-red-400 text-xs font-bold bg-red-400/10 px-2 py-0.5 rounded-full">SEVERE</span>}
+                        {metric.trend === 'good' && <span className="text-green-400 text-xs font-bold bg-green-400/10 px-2 py-0.5 rounded-full">IMPROVED</span>}
+                        {metric.trend !== 'bad' && metric.trend !== 'good' && <span className="text-yellow-400 text-xs font-bold bg-yellow-400/10 px-2 py-0.5 rounded-full">CHANGED</span>}
+                      </div>
+                      <p className="text-3xl font-extrabold text-white tracking-tight mb-2">{metric.value}</p>
+                      <p className="text-sm text-purple-300 bg-purple-500/10 px-3 py-1.5 rounded-lg inline-block w-full">{metric.context}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
