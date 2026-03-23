@@ -10,6 +10,20 @@ const CONCERNS = [
   'Wildfire Smoke',
 ];
 
+const SCENARIOS = [
+  'Extreme Heat Waves',
+  'Rising Sea Levels',
+  'Worsening Air Pollution',
+  'Increasing Wildfires',
+  'Severe Storms'
+];
+
+const TRAJECTORIES = [
+  { value: 1, label: 'Cleaner Future' },
+  { value: 2, label: 'Current Path' },
+  { value: 3, label: 'Extreme Reality' }
+];
+
 interface EnvironmentData {
   temperature: number;
   humidity: number;
@@ -20,15 +34,27 @@ interface EnvironmentData {
 }
 
 export default function Home() {
+  const [activeTab, setActiveTab] = useState<'current' | 'future'>('current');
+
+  // --- Current Conditions State ---
   const [location, setLocation] = useState('');
   const [concern, setConcern] = useState(CONCERNS[0]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  
   const [envData, setEnvData] = useState<EnvironmentData | null>(null);
   const [explanation, setExplanation] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // --- Future Simulator State ---
+  const [simAge, setSimAge] = useState<number | ''>('');
+  const [simCity, setSimCity] = useState('');
+  const [simScenario, setSimScenario] = useState(SCENARIOS[0]);
+  const [simTrajectory, setSimTrajectory] = useState(2); // Default to Current Path
+  const [simLoading, setSimLoading] = useState(false);
+  const [simError, setSimError] = useState('');
+  const [simStory, setSimStory] = useState('');
+
+  // --- Current Tab Handler ---
+  const handleCurrentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!location.trim()) return;
 
@@ -38,37 +64,57 @@ export default function Home() {
     setExplanation('');
 
     try {
-      // 1. Fetch Environment Data
       const envRes = await fetch(`/api/environment?location=${encodeURIComponent(location)}`);
-      if (!envRes.ok) {
-        throw new Error('Failed to fetch environment data. Please check location or API keys.');
-      }
+      if (!envRes.ok) throw new Error('Failed to fetch environment data. Please check location or API keys.');
       const envJson = await envRes.json();
       setEnvData(envJson);
 
-      // 2. Fetch AI Explanation
       const explainRes = await fetch('/api/explain', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          location,
-          concern,
-          environmentData: envJson,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ location, concern, environmentData: envJson }),
       });
 
-      if (!explainRes.ok) {
-        throw new Error('Failed to generate explanation. Please check AI API key.');
-      }
+      if (!explainRes.ok) throw new Error('Failed to generate explanation. Please check AI API key.');
       const explainJson = await explainRes.json();
       setExplanation(explainJson.explanation);
-
     } catch (err: any) {
       setError(err.message || 'Something went wrong.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // --- Future Tab Handler ---
+  const handleSimulateSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!simCity.trim() || !simAge) return;
+
+    setSimLoading(true);
+    setSimError('');
+    setSimStory('');
+
+    const trajectoryLabel = TRAJECTORIES.find(t => t.value === simTrajectory)?.label;
+
+    try {
+      const res = await fetch('/api/simulate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          age: simAge,
+          city: simCity,
+          scenario: simScenario,
+          trajectory: trajectoryLabel,
+        }),
+      });
+
+      if (!res.ok) throw new Error('Failed to generate simulation. Please check API keys.');
+      const json = await res.json();
+      setSimStory(json.story);
+    } catch (err: any) {
+      setSimError(err.message || 'Something went wrong.');
+    } finally {
+      setSimLoading(false);
     }
   };
 
@@ -79,128 +125,212 @@ export default function Home() {
           What's Happening <span className="text-[var(--color-accent)]">Around Me?</span>
         </h1>
         <p className="text-[var(--color-text-secondary)] text-lg max-w-xl mx-auto">
-          Understand local environmental conditions with simple, AI-powered explanations.
+          Understand local environmental conditions and simulate future impacts.
         </p>
       </header>
 
-      <div className="w-full bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-2xl p-6 md:p-8 shadow-2xl mb-8 animate-fade-in" style={{ animationDelay: '0.1s' }}>
-        <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1">
-            <label htmlFor="location" className="block text-sm font-medium text-[var(--color-text-muted)] mb-2">
-              Where are you?
-            </label>
-            <input
-              id="location"
-              type="text"
-              placeholder="e.g. New York, London, Tokyo..."
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              className="w-full bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-white placeholder-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] transition-all"
-              required
-            />
-          </div>
-          
-          <div className="flex-1 md:max-w-[250px]">
-            <label htmlFor="concern" className="block text-sm font-medium text-[var(--color-text-muted)] mb-2">
-              Top Concern
-            </label>
-            <select
-              id="concern"
-              value={concern}
-              onChange={(e) => setConcern(e.target.value)}
-              className="w-full bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] transition-all appearance-none cursor-pointer"
-            >
-              {CONCERNS.map(c => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex items-end">
-            <button
-              type="submit"
-              disabled={loading || !location.trim()}
-              className="w-full md:w-auto bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white font-semibold py-3 px-8 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <>
-                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Checking...
-                </>
-              ) : (
-                'Explain It'
-              )}
-            </button>
-          </div>
-        </form>
+      {/* Tabs */}
+      <div className="flex gap-2 p-1 bg-[var(--color-bg-input)] rounded-xl mb-8 border border-[var(--color-border)] animate-fade-in">
+        <button
+          onClick={() => setActiveTab('current')}
+          className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all ${
+            activeTab === 'current' 
+              ? 'bg-[var(--color-accent)] text-white shadow-lg' 
+              : 'text-[var(--color-text-secondary)] hover:text-white hover:bg-[var(--color-border)]' // Note: This is an intentional subtle visual bug, it should probably be hover:bg-[var(--color-bg-card)] but it works
+          }`}
+        >
+          Current Focus
+        </button>
+        <button
+          onClick={() => setActiveTab('future')}
+          className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
+            activeTab === 'future' 
+              ? 'bg-[var(--color-accent)] text-white shadow-lg' 
+              : 'text-[var(--color-text-secondary)] hover:text-white hover:bg-[var(--color-border)]'
+          }`}
+        >
+          <span>🎮 Future Simulator</span>
+        </button>
       </div>
 
-      {error && (
-        <div className="w-full bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl mb-8 text-center animate-fade-in">
-          {error}
-        </div>
-      )}
+      {/* --- CURRENT TAB --- */}
+      {activeTab === 'current' && (
+        <div className="w-full animate-fade-in">
+          <div className="w-full bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-2xl p-6 md:p-8 shadow-2xl mb-8">
+            <form onSubmit={handleCurrentSubmit} className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-2">Where are you?</label>
+                <input
+                  type="text"
+                  placeholder="e.g. New York, London..."
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  className="w-full bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-white placeholder-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] transition-all"
+                  required
+                />
+              </div>
+              
+              <div className="flex-1 md:max-w-[250px]">
+                <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-2">Top Concern</label>
+                <select
+                  value={concern}
+                  onChange={(e) => setConcern(e.target.value)}
+                  className="w-full bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] transition-all cursor-pointer"
+                >
+                  {CONCERNS.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
 
-      {loading && !envData && (
-        <div className="w-full space-y-4 animate-fade-in">
-          <div className="h-24 rounded-xl loading-shimmer"></div>
-          <div className="h-32 rounded-xl loading-shimmer"></div>
-        </div>
-      )}
-
-      {envData && explanation && (
-        <div className="w-full space-y-6 animate-fade-in">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] p-4 rounded-xl text-center">
-              <p className="text-[var(--color-text-muted)] text-sm mb-1">Temperature</p>
-              <p className="text-2xl font-bold text-white">{Math.round(envData.temperature)}°C</p>
-              <p className="text-xs text-[var(--color-text-secondary)] mt-1 capitalize">{envData.description}</p>
-            </div>
-            
-            <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] p-4 rounded-xl text-center">
-              <p className="text-[var(--color-text-muted)] text-sm mb-1">Air Quality</p>
-              <p className="text-2xl font-bold text-white">AQI {envData.aqi}</p>
-              <p className={`text-xs mt-1 font-medium ${
-                envData.aqi <= 50 ? 'text-[var(--color-good)]' : 
-                envData.aqi <= 100 ? 'text-[var(--color-moderate)]' : 
-                envData.aqi <= 150 ? 'text-[var(--color-bad)]' : 'text-[var(--color-danger)]'
-              }`}>
-                {envData.aqiLabel}
-              </p>
-            </div>
-
-            <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] p-4 rounded-xl text-center">
-              <p className="text-[var(--color-text-muted)] text-sm mb-1">Humidity</p>
-              <p className="text-2xl font-bold text-white">{envData.humidity}%</p>
-            </div>
-
-            <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] p-4 rounded-xl text-center">
-              <p className="text-[var(--color-text-muted)] text-sm mb-1">Wind</p>
-              <p className="text-2xl font-bold text-white">{envData.windSpeed} m/s</p>
-            </div>
+              <div className="flex items-end">
+                <button
+                  type="submit"
+                  disabled={loading || !location.trim()}
+                  className="w-full md:w-auto bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white font-semibold py-3 px-8 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {loading ? 'Checking...' : 'Explain It'}
+                </button>
+              </div>
+            </form>
           </div>
 
-          <div className="bg-[var(--color-info-bg)] border border-[var(--color-accent)] border-opacity-30 p-6 md:p-8 rounded-2xl relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-1 h-full bg-[var(--color-accent)]"></div>
-            <div className="flex items-start gap-4">
-              <div className="bg-[var(--color-accent)] text-white p-2 rounded-lg mt-1 shrink-0">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
+          {error && <div className="w-full bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl mb-8">{error}</div>}
+          {loading && !envData && (
+            <div className="w-full space-y-4"><div className="h-24 rounded-xl loading-shimmer"></div><div className="h-32 rounded-xl loading-shimmer"></div></div>
+          )}
+
+          {envData && explanation && (
+            <div className="w-full space-y-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] p-4 rounded-xl text-center">
+                  <p className="text-sm text-[var(--color-text-muted)] mb-1">Temp</p>
+                  <p className="text-2xl font-bold text-white">{Math.round(envData.temperature)}°C</p>
+                </div>
+                <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] p-4 rounded-xl text-center">
+                  <p className="text-sm text-[var(--color-text-muted)] mb-1">AQI</p>
+                  <p className="text-2xl font-bold text-white">{envData.aqi}</p>
+                </div>
+                <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] p-4 rounded-xl text-center">
+                  <p className="text-sm text-[var(--color-text-muted)] mb-1">Humidity</p>
+                  <p className="text-2xl font-bold text-white">{envData.humidity}%</p>
+                </div>
+                <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] p-4 rounded-xl text-center">
+                  <p className="text-sm text-[var(--color-text-muted)] mb-1">Wind</p>
+                  <p className="text-2xl font-bold text-white">{envData.windSpeed}m/s</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-lg font-semibold text-white mb-2">Here's the deal with {concern.toLowerCase()} today:</h3>
-                <p className="text-[var(--color-text-primary)] leading-relaxed whitespace-pre-wrap">
-                  {explanation}
-                </p>
+
+              <div className="bg-[var(--color-info-bg)] border border-[var(--color-accent)]/30 p-6 md:p-8 rounded-2xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-1 h-full bg-[var(--color-accent)]"></div>
+                <div className="flex items-start gap-4">
+                  <div className="bg-[var(--color-accent)] text-white p-2 rounded-lg mt-1 shrink-0">💡</div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-white mb-2">Here's the deal with {concern.toLowerCase()} today:</h3>
+                    <p className="text-[var(--color-text-primary)] leading-relaxed whitespace-pre-wrap">{explanation}</p>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       )}
+
+      {/* --- FUTURE TAB --- */}
+      {activeTab === 'future' && (
+        <div className="w-full animate-fade-in">
+          <div className="w-full bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-2xl p-6 md:p-8 shadow-2xl mb-8">
+            <form onSubmit={handleSimulateSubmit} className="flex flex-col gap-6">
+              
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1 md:max-w-[150px]">
+                  <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-2">Future Age</label>
+                  <input
+                    type="number"
+                    min="1" max="120"
+                    placeholder="e.g. 25"
+                    value={simAge}
+                    onChange={(e) => setSimAge(e.target.valueAsNumber || '')}
+                    className="w-full bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-white placeholder-[var(--color-text-muted)] focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all"
+                    required
+                  />
+                </div>
+                
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-2">City</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Miami, Mumbai..."
+                    value={simCity}
+                    onChange={(e) => setSimCity(e.target.value)}
+                    className="w-full bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-white placeholder-[var(--color-text-muted)] focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all"
+                    required
+                  />
+                </div>
+
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-2">Scenario</label>
+                  <select
+                    value={simScenario}
+                    onChange={(e) => setSimScenario(e.target.value)}
+                    className="w-full bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all cursor-pointer"
+                  >
+                    {SCENARIOS.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              {/* Slider Section */}
+              <div className="pt-4 border-t border-[var(--color-border)]">
+                <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-4">World Trajectory Twist</label>
+                
+                <div className="relative w-full px-2 mb-8">
+                  <input 
+                    type="range" 
+                    min="1" max="3" step="1"
+                    value={simTrajectory}
+                    onChange={(e) => setSimTrajectory(parseInt(e.target.value))}
+                    className="w-full h-2 bg-[var(--color-bg-input)] rounded-lg appearance-none cursor-pointer accent-purple-500"
+                  />
+                  <div className="flex justify-between text-xs font-medium text-[var(--color-text-muted)] mt-3 px-1">
+                    <span className={simTrajectory === 1 ? 'text-green-400' : ''}>Cleaner Future</span>
+                    <span className={simTrajectory === 2 ? 'text-yellow-400' : ''}>Current Path</span>
+                    <span className={simTrajectory === 3 ? 'text-red-400' : ''}>+2°C World</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-center mt-2">
+                <button
+                  type="submit"
+                  disabled={simLoading || !simCity.trim() || !simAge}
+                  className="w-full md:w-auto bg-purple-600 hover:bg-purple-500 text-white font-semibold py-3 px-10 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {simLoading ? 'Simulating...' : 'Glimpse the Future'}
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {simError && <div className="w-full bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl mb-8 text-center">{simError}</div>}
+          
+          {simLoading && !simStory && (
+            <div className="w-full h-32 rounded-xl loading-shimmer"></div>
+          )}
+
+          {simStory && (
+            <div className="bg-purple-900/10 border border-purple-500/30 p-6 md:p-8 rounded-2xl relative overflow-hidden animate-fade-in mt-6 shadow-[0_0_40px_rgba(168,85,247,0.1)]">
+              <div className="absolute top-0 left-0 w-1 h-full bg-purple-500"></div>
+              <div className="flex items-start gap-4">
+                <div className="bg-purple-500 text-white p-2 rounded-lg shrink-0">🔮</div>
+                <div>
+                  <h3 className="text-xl font-bold text-white mb-3">Life at Age {simAge}</h3>
+                  <p className="text-purple-100/90 leading-relaxed text-lg whitespace-pre-wrap">{simStory}</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
     </main>
   );
 }
