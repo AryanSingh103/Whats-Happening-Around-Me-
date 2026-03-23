@@ -1,44 +1,18 @@
 # What's Happening Around Me? 🌍
 
-A simple, fast, single-page Next.js application that explains local environmental conditions in engaging, youth-friendly language using AI.
+"What's Happening Around Me?" is a simple, fast application designed to explain local environmental conditions in engaging, youth-friendly language. 
 
-## Features
-- **Simple UI**: Just enter your location and pick a concern (Air Pollution, Heat Wave, etc.)
-- **Real-Time Data**: Fetches actual temperature, humidity, wind, and AQI.
-- **AI Explanations**: Uses OpenAI to translate hard data into conversational, relatable analogies.
+Instead of overwhelming users with complex charts, raw data, or confusing scientific jargon, this app translates real-time environmental metrics into relatable analogies that anyone can understand.
 
-## Tech Stack
-- Frontend & Backend: [Next.js 16](https://nextjs.org/) (App Directory)
-- Styling: [Tailwind CSS v4](https://tailwindcss.com/)
-- API Routes: Next.js API Handlers
-- Fonts: Google Inter (via `next/font`)
+## How It Works
 
-## Setup Instructions
+1. **Enter Your Location**: Simply type in where you are (e.g., "New York", "London", "Tokyo").
+2. **Pick Your Concern**: Select the environmental issue you care about most right now, such as:
+   - Air Pollution
+   - Heat Waves
+   - UV Exposure
+   - Flooding
+   - Wildfire Smoke
+3. **Get an Explanation**: The app pulls real-time, hyper-local data (like Temperature, Air Quality Index, Humidity, and Wind Speed) and uses AI to generate a short, conversational summary. For example, instead of just saying "AQI 165", it might tell you: *"That's like breathing smoke from a campfire all day."*
 
-1. **Install Dependencies**
-   ```bash
-   npm install
-   ```
-
-2. **Configure Environment Variables**
-   Open `.env.local` and add your API keys:
-   ```env
-   OPENWEATHERMAP_API_KEY=your_key_here
-   WAQI_API_KEY=your_key_here
-   OPENAI_API_KEY=your_key_here
-   ```
-   *Note: If you don't add keys immediately, the app will fall back to dummy data so you can still test the UI.*
-
-3. **Run the Development Server**
-   ```bash
-   npm run dev
-   ```
-
-4. **Open in Browser**
-   Navigate to [http://localhost:3000](http://localhost:3000)
-
-## API Providers
-
-1. **OpenWeatherMap**: Used for temperature, wind, and general weather descriptions. Get a free key at [openweathermap.org](https://openweathermap.org/api).
-2. **World Air Quality Project (WAQI)**: Used for AQI data. Get a free token at [aqicn.org/data-platform/token/](https://aqicn.org/data-platform/token/).
-3. **OpenAI**: Used to generate the youth-friendly explanations (uses `gpt-4o-mini`). Get a key at [platform.openai.com](https://platform.openai.com/).
+The goal is to make environmental awareness accessible, simple, and immediately understandable for everyone.
