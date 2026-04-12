@@ -18,41 +18,37 @@ export async function POST(request: Request) {
 
     const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
     if (!OPENAI_API_KEY) {
-      // Dummy response if key is missing
-      return NextResponse.json({
-        data: {
-          story: `(Add your OpenAI API Key to .env.local!)\n\nFast forward ${yearsInFuture} years to the year ${futureYear}. At age ${futureAge}, living in ${city} feels very different. Because of ${scenario.toLowerCase()}, under the '${trajectory}' trajectory, things have changed significantly.`,
-          metrics: [
-            { name: "Average Summer Temp", value: "105°F", context: "Up 12°F from today", trend: "bad" },
-            { name: "Unhealthy AQI Days", value: "85 days/yr", context: "Triple the historical average", trend: "bad" },
-            { name: "Sea Level Rise", value: "+1.5 ft", context: "Constant nuisance flooding", trend: "bad" }
-          ]
+      return NextResponse.json(
+        {
+          error: 'OPENAI_API_KEY is missing. Add it to .env.local for local development or set it in your deployment environment.',
         },
-        futureYear 
-      });
+        { status: 500 }
+      );
     }
 
     const prompt = `
-You are a climate forecasting AI simulating the tangible future impact of environmental changes.
-The user is currently ${currentAge} years old, living in ${city}.
-They want to know what the numbers and daily life will look like ${yearsInFuture} years from now in the year ${futureYear}, when they are ${futureAge} years old.
-They are focusing on the specific scenario: "${scenario}".
+You are a highly advanced climate forecasting AI simulating the profound future impact of environmental changes on human life.
+The user is currently ${currentAge} years old, living right now in ${city}.
+They are asking you to gaze into the future and tell them exactly what their daily physical life will feel like ${yearsInFuture} years from now, in the year ${futureYear}, when they turn ${futureAge} years old.
+They are highly focused on this specific environmental threat: "${scenario}".
 
-The world is currently on the following trajectory: "${trajectory}". 
-(Note: 'Cleaner Future' means aggressive climate action was taken. 'Current Path' means +1.5 to 2°C warming. 'Extreme Reality' means +2.5°C+ warming).
+The world is currently locked onto the following trajectory: "${trajectory}". 
+(Context: 'Cleaner Future' = aggressive, rapid climate action was successfully taken. 'Current Path' = typical +1.5 to +2°C warming with moderate adaptation. 'Extreme Reality' = a severe +2.5°C or higher warming scenario where inaction led to rapid tipping points).
 
-You MUST respond in strict JSON format. Do not use markdown blocks outside of the JSON. 
-Structure your JSON exactly like this:
+Your response must be striking, personal, and scientifically plausible.
+
+You MUST respond in strict JSON format without any markdown wrappers outside the JSON string.
+Structure your JSON exclusively like this:
 {
-  "story": "A short, engaging 2-3 sentence story in the second person ('You') about a tangible moment in their daily life highlighting the physical changes.",
+  "story": "A deeply vivid, 2-3 sentence story in the second person ('You') about a routine moment in their daily life that highlights the physical changes. Make it feel real and immersive, showing—not just telling—how much the city has transformed.",
   "metrics": [
     {
-      "name": "Name of Metric (e.g. Summer Highs, Unhealthy AQI Days)",
+      "name": "Name of Metric (e.g. Summer Highs, Unhealthy AQI Days, Sea Level)",
       "value": "Predicted numerical value with unit",
-      "context": "Short comparison to today (e.g., '+10 units from today')",
-      "trend": "bad" // must be either "bad", "good", or "neutral"
+      "context": "Short, striking comparison to today (e.g., 'Double the historic average', '+15 units from today')",
+      "trend": "bad" // must be one of: "bad", "good", or "neutral"
     },
-    ... generate exactly 3 highly relevant metrics based on their city and chosen scenario ...
+    ... generate EXACTLY 3 powerful, contextually accurate metrics based on their specific city (${city}) and their chosen scenario ...
   ]
 }
     `.trim();

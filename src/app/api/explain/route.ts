@@ -12,26 +12,29 @@ export async function POST(request: Request) {
     const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
     if (!OPENAI_API_KEY) {
-      // Dummy response if key is missing
-      return NextResponse.json({
-        explanation: `(Add your OpenAI API Key to .env.local to get real AI explanations!)\n\nRight now in ${location}, the temperature is ${Math.round(environmentData.temperature)}°C and the air quality is ${environmentData.aqiLabel} (AQI ${environmentData.aqi}). Regarding ${concern.toLowerCase()}, things are looking okay, but it's always good to stay informed!`
-      });
+      return NextResponse.json(
+        {
+          error: 'OPENAI_API_KEY is missing. Add it to .env.local for local development or set it in your deployment environment.',
+        },
+        { status: 500 }
+      );
     }
 
     const prompt = `
-You are a friendly, helpful assistant talking to a regular person (not a scientist).
-They are in ${location} and their main concern right now is "${concern}".
+You are a friendly, highly empathetic, and insightful assistant talking to a regular person (someone without a science background).
+They are currently in ${location} and their primary concern today is "${concern}".
 
-Here is the current environmental data for their location:
+Here is the real-time environmental data for their specific location:
 - Temperature: ${environmentData.temperature}°C
-- Condition: ${environmentData.description}
+- Weather Condition: ${environmentData.description}
 - Air Quality Index (AQI): ${environmentData.aqi} (${environmentData.aqiLabel})
 - Humidity: ${environmentData.humidity}%
 - Wind Speed: ${environmentData.windSpeed} m/s
 
-Write a short (3-4 sentences), incredibly simple, and youth-friendly explanation of what this data means for them right now, specifically focusing on their concern about ${concern}. 
-Use an easily understandable analogy if it helps (e.g. "it's like breathing smoke from a campfire"). 
-Do not use complicated jargon or markdown. Be conversational and direct.
+Your task is to write a short (3-4 sentences), highly engaging, and youth-friendly explanation of what this data actually feels like right now, specifically tying it back to their concern about ${concern}. 
+- Use a vivid, easily understandable analogy to make the numbers real (e.g. "it's like breathing smoke from a campfire" or "like standing behind a hot bus exhaust"). 
+- Offer one quick, practical piece of advice on how they should go about their day based on this data.
+- Do not use complicated jargon or markdown. Keep the tone conversational, helpful, and direct.
     `.trim();
 
     const aiRes = await fetch('https://api.openai.com/v1/chat/completions', {
