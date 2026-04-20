@@ -104,9 +104,8 @@ export default function Home() {
   }, [chatMessages]);
 
   // --- Current Tab Handler ---
-  const handleCurrentSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!location.trim()) return;
+  const fetchCurrentData = async (locToFetch: string) => {
+    if (!locToFetch.trim()) return;
 
     setLoading(true);
     setError('');
@@ -114,7 +113,7 @@ export default function Home() {
     setExplanation('');
 
     try {
-      const envRes = await fetch(`/api/environment?location=${encodeURIComponent(location)}`);
+      const envRes = await fetch(`/api/environment?location=${encodeURIComponent(locToFetch)}`);
       if (!envRes.ok) throw new Error('Failed to fetch environment data. Please check location or API keys.');
       const envJson = await envRes.json();
       setEnvData(envJson);
@@ -122,7 +121,7 @@ export default function Home() {
       const explainRes = await fetch('/api/explain', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ location, concern, environmentData: envJson }),
+        body: JSON.stringify({ location: locToFetch, concern, environmentData: envJson }),
       });
 
       if (!explainRes.ok) throw new Error('Failed to generate explanation. Please check AI API key.');
@@ -133,6 +132,11 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCurrentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await fetchCurrentData(location);
   };
 
   const handleLocateMe = () => {
@@ -154,6 +158,7 @@ export default function Home() {
           if (data.error) throw new Error(data.error);
           
           setLocation(data.city);
+          await fetchCurrentData(data.city);
         } catch (err: any) {
           setError(err.message || 'Could not find your city.');
         } finally {
@@ -162,7 +167,7 @@ export default function Home() {
       },
       (err) => {
         setIsLocating(false);
-        setError('Unable to retrieve your location. Please allow location access.');
+        setError('Unable to retrieve your location. Browser may require HTTPS or Location access is denied.');
       }
     );
   };
