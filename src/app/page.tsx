@@ -1,11 +1,9 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useChat } from 'ai/react';
 
 interface ChatMessage {
-  id?: string;
-  role: 'user' | 'assistant' | 'system' | 'data';
+  role: 'user' | 'assistant';
   content: string;
 }
 
@@ -77,23 +75,13 @@ export default function Home() {
   const [simFutureYear, setSimFutureYear] = useState<number | null>(null);
 
   // --- Chat State ---
-  const { 
-    messages: chatMessages, 
-    input: chatInput, 
-    handleInputChange: handleChatInputChange, 
-    handleSubmit: handleChatSubmit, 
-    isLoading: isChatLoading, 
-    error: chatErrorObj 
-  } = useChat({
-    initialMessages: [{
-      id: 'welcome',
-      role: 'assistant',
-      content: "Hi there! I'm your Eco-Assistant. Ask me anything about climate science, local weather patterns, or environmental data!"
-    }],
-    body: { contextData: envData }
-  });
-
-  const chatError = chatErrorObj?.message || '';
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([{
+    role: 'assistant',
+    content: "Hi there! I'm your Eco-Assistant. Ask me anything about climate science, local weather patterns, or environmental data!"
+  }]);
+  const [chatInput, setChatInput] = useState('');
+  const [isChatLoading, setIsChatLoading] = useState(false);
+  const [chatError, setChatError] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -102,6 +90,39 @@ export default function Home() {
   useEffect(() => {
     scrollToBottom();
   }, [chatMessages]);
+
+  const handleChatSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatInput.trim() || isChatLoading) return;
+
+    const userMsg = chatInput.trim();
+    setChatInput('');
+    setChatError('');
+    setIsChatLoading(true);
+
+    const newMessages: ChatMessage[] = [...chatMessages, { role: 'user', content: userMsg }];
+    setChatMessages(newMessages);
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: newMessages.map(m => ({ role: m.role, content: m.content })),
+          contextData: envData
+        }),
+      });
+
+      if (!res.ok) throw new Error('Failed to get response');
+      const data = await res.json();
+      
+      setChatMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
+    } catch (err: any) {
+      setChatError(err.message || 'Something went wrong connecting to the AI.');
+    } finally {
+      setIsChatLoading(false);
+    }
+  };
 
   // --- Current Tab Handler ---
   const fetchCurrentData = async (locToFetch: string) => {
@@ -452,7 +473,7 @@ export default function Home() {
               <input
                 type="text"
                 value={chatInput}
-                onChange={handleChatInputChange}
+                onChange={e => setChatInput(e.target.value)}
                 placeholder={isChatLoading ? "Assistant is typing..." : "Ask about climate, weather, environmental data..."}
                 disabled={isChatLoading}
                 className="flex-1 bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-white placeholder-[var(--color-text-muted)] focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all disabled:opacity-50"
