@@ -61,6 +61,7 @@ export default function Home() {
   const [error, setError] = useState('');
   const [envData, setEnvData] = useState<EnvironmentData | null>(null);
   const [explanation, setExplanation] = useState('');
+  const [isLocating, setIsLocating] = useState(false);
 
   // --- Future Simulator State ---
   const [currentAge, setCurrentAge] = useState<number | ''>('');
@@ -153,6 +154,38 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleLocateMe = () => {
+    if (!navigator.geolocation) {
+      setError('Geolocation is not supported by your browser.');
+      return;
+    }
+
+    setIsLocating(true);
+    setError('');
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          const res = await fetch(`/api/geocode?lat=${latitude}&lon=${longitude}`);
+          if (!res.ok) throw new Error('Failed to determine city from location.');
+          const data = await res.json();
+          if (data.error) throw new Error(data.error);
+          
+          setLocation(data.city);
+        } catch (err: any) {
+          setError(err.message || 'Could not find your city.');
+        } finally {
+          setIsLocating(false);
+        }
+      },
+      (err) => {
+        setIsLocating(false);
+        setError('Unable to retrieve your location. Please allow location access.');
+      }
+    );
   };
 
   // --- Future Tab Handler ---
@@ -293,7 +326,26 @@ export default function Home() {
           <div className="w-full bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-2xl p-6 md:p-8 shadow-2xl mb-8">
             <form onSubmit={handleCurrentSubmit} className="flex flex-col md:flex-row gap-4">
               <div className="flex-1">
-                <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-2">Where are you?</label>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block text-sm font-medium text-[var(--color-text-muted)]">Where are you?</label>
+                  <button 
+                    type="button" 
+                    onClick={handleLocateMe}
+                    disabled={isLocating}
+                    className="text-xs text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] flex items-center gap-1 transition-colors disabled:opacity-50"
+                  >
+                    {isLocating ? (
+                      <>
+                        <div className="w-3 h-3 border border-[var(--color-accent)] border-t-transparent rounded-full animate-spin"></div>
+                        Locating...
+                      </>
+                    ) : (
+                      <>
+                        <span>📍</span> Detect Location
+                      </>
+                    )}
+                  </button>
+                </div>
                 <input
                   type="text"
                   placeholder="e.g. New York, London, Tokyo..."
