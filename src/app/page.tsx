@@ -437,7 +437,7 @@ export default function Home() {
             </div>
             {envData && (
               <span className="ml-auto text-xs bg-emerald-500/20 text-emerald-300 px-3 py-1.5 rounded-full border border-emerald-500/30 hidden sm:block">
-                Context: {envData.location}
+                Context: {location}
               </span>
             )}
           </div>
