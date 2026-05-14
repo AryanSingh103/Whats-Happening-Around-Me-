@@ -6,13 +6,15 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { CurrentFocusPanel } from '@/components/current/CurrentFocusPanel';
 import { FutureSimulatorPanel } from '@/components/simulator/FutureSimulatorPanel';
 import { ChatPanel } from '@/components/chat/ChatPanel';
+import { useTheme } from '@/hooks/useTheme';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('current');
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <main className="flex min-h-screen w-full relative bg-[var(--color-bg-base)]">
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} theme={theme} toggleTheme={toggleTheme} />
 
       {/* Main Content — offset by sidebar width on desktop */}
       <div className="flex-1 w-full md:ml-[260px] p-6 pt-8 md:p-12 max-w-4xl mx-auto flex flex-col items-center pb-28 md:pb-12">

@@ -5,6 +5,8 @@ import { ActiveTab } from '@/types';
 interface SidebarProps {
   activeTab: ActiveTab;
   setActiveTab: (tab: ActiveTab) => void;
+  theme: 'dark' | 'light';
+  toggleTheme: () => void;
 }
 
 const TABS: { id: ActiveTab; label: string; emoji: string; activeClass: string }[] = [
@@ -28,7 +30,7 @@ const TABS: { id: ActiveTab; label: string; emoji: string; activeClass: string }
   },
 ];
 
-export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
+export function Sidebar({ activeTab, setActiveTab, theme, toggleTheme }: SidebarProps) {
   return (
     <>
       {/* ── Desktop Sidebar (always visible) ── */}
@@ -71,8 +73,20 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
           </nav>
 
           {/* Footer */}
-          <div className="pt-4 border-t border-[var(--color-border)] text-center text-xs text-[var(--color-text-muted)]">
-            Powered by OpenAI & OpenWeather
+          <div className="pt-4 border-t border-[var(--color-border)] flex items-center justify-between">
+            <span className="text-xs text-[var(--color-text-muted)]">Powered by OpenAI</span>
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg bg-[var(--color-bg-input)] border border-[var(--color-border)] hover:border-[var(--color-accent)]/50 transition-all text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] active:scale-95"
+              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            >
+              {theme === 'dark' ? (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+              ) : (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+              )}
+            </button>
           </div>
         </div>
       </aside>
@@ -103,6 +117,14 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
               )}
             </button>
           ))}
+          <button
+            onClick={toggleTheme}
+            className="flex flex-col items-center justify-center py-3 px-3 gap-1 text-[var(--color-text-muted)] transition-all"
+            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          >
+            <span className="text-xl">{theme === 'dark' ? '☀️' : '🌙'}</span>
+            <span className="text-[0.65rem] font-semibold uppercase tracking-wider">Theme</span>
+          </button>
         </div>
       </nav>
     </>
