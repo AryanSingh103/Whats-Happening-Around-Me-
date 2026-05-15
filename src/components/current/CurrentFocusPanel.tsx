@@ -7,6 +7,7 @@ import { LoadingShimmer } from '@/components/ui/LoadingShimmer';
 import { ErrorBanner } from '@/components/ui/ErrorBanner';
 import { EnvironmentData } from '@/types';
 import { useCallback, useEffect } from 'react';
+import { exportCSV, exportJSON, exportPDF } from '@/lib/export';
 
 interface CurrentFocusPanelProps {
   envData: EnvironmentData | null;
@@ -210,6 +211,34 @@ export function CurrentFocusPanel({ onDataFetched, initialLocation }: CurrentFoc
                 </p>
               </div>
             </div>
+          </div>
+
+          {/* Export Buttons */}
+          <div className="flex flex-wrap gap-2 pt-2 animate-fade-in" style={{ animationDelay: '400ms' }}>
+            <button
+              onClick={() => exportCSV(location, concern, explanation, envData)}
+              className="flex items-center gap-1.5 px-4 py-2 bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-xl text-sm text-[var(--color-text-secondary)] hover:text-white hover:border-[var(--color-accent)]/50 transition-all hover:shadow-md"
+              aria-label="Export as CSV"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+              CSV
+            </button>
+            <button
+              onClick={() => exportJSON(location, concern, explanation, envData)}
+              className="flex items-center gap-1.5 px-4 py-2 bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-xl text-sm text-[var(--color-text-secondary)] hover:text-white hover:border-[var(--color-accent)]/50 transition-all hover:shadow-md"
+              aria-label="Export as JSON"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+              JSON
+            </button>
+            <button
+              onClick={() => exportPDF(location, concern, explanation, envData)}
+              className="flex items-center gap-1.5 px-4 py-2 bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-xl text-sm text-[var(--color-text-secondary)] hover:text-white hover:border-[var(--color-accent)]/50 transition-all hover:shadow-md"
+              aria-label="Export as PDF report"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+              PDF Report
+            </button>
           </div>
         </div>
       )}
