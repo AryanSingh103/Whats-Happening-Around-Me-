@@ -7,6 +7,8 @@ interface SidebarProps {
   setActiveTab: (tab: ActiveTab) => void;
   theme: 'dark' | 'light';
   toggleTheme: () => void;
+  historyCount?: number;
+  onOpenHistory: () => void;
 }
 
 const TABS: { id: ActiveTab; label: string; emoji: string; activeClass: string }[] = [
@@ -30,7 +32,7 @@ const TABS: { id: ActiveTab; label: string; emoji: string; activeClass: string }
   },
 ];
 
-export function Sidebar({ activeTab, setActiveTab, theme, toggleTheme }: SidebarProps) {
+export function Sidebar({ activeTab, setActiveTab, theme, toggleTheme, historyCount = 0, onOpenHistory }: SidebarProps) {
   return (
     <>
       {/* ── Desktop Sidebar (always visible) ── */}
@@ -71,6 +73,22 @@ export function Sidebar({ activeTab, setActiveTab, theme, toggleTheme }: Sidebar
               </button>
             ))}
           </nav>
+
+          {/* History Button */}
+          <button
+            onClick={onOpenHistory}
+            className="w-full text-left px-4 py-3 rounded-xl font-medium transition-all flex items-center justify-between gap-2 text-[var(--color-text-secondary)] hover:text-white hover:bg-[var(--color-bg-input)] border border-transparent hover:border-[var(--color-border)] mt-2"
+          >
+            <span className="text-[0.95rem] flex items-center gap-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              History
+            </span>
+            {historyCount > 0 && (
+              <span className="text-xs bg-[var(--color-accent)]/20 text-[var(--color-accent)] px-2 py-0.5 rounded-full font-semibold">
+                {historyCount}
+              </span>
+            )}
+          </button>
 
           {/* Footer */}
           <div className="pt-4 border-t border-[var(--color-border)] flex items-center justify-between">

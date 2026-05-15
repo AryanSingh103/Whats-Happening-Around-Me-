@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react';
 import { EnvironmentData } from '@/types';
 import { fetchEnvironmentData, fetchExplanation, fetchGeocode } from '@/lib/api';
 
-export function useEnvironmentData() {
+export function useEnvironmentData(onDataFetched?: (location: string, concern: string, data: EnvironmentData) => void) {
   const [location, setLocation] = useState('');
   const [concern, setConcern] = useState('Air Pollution');
   const [loading, setLoading] = useState(false);
@@ -31,12 +31,15 @@ export function useEnvironmentData() {
         envJson
       );
       setExplanation(explainJson.explanation);
+
+      // Notify parent that data was fetched successfully
+      onDataFetched?.(locToFetch, selectedConcern || concern, envJson);
     } catch (err: any) {
       setError(err.message || 'Something went wrong.');
     } finally {
       setLoading(false);
     }
-  }, [concern]);
+  }, [concern, onDataFetched]);
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();

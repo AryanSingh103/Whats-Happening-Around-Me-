@@ -1,20 +1,51 @@
 'use client';
 
-import { useState } from 'react';
-import { ActiveTab } from '@/types';
+import { useState, useCallback } from 'react';
+import { ActiveTab, EnvironmentData } from '@/types';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { CurrentFocusPanel } from '@/components/current/CurrentFocusPanel';
 import { FutureSimulatorPanel } from '@/components/simulator/FutureSimulatorPanel';
 import { ChatPanel } from '@/components/chat/ChatPanel';
+import { SearchHistoryPanel } from '@/components/history/SearchHistoryPanel';
 import { useTheme } from '@/hooks/useTheme';
+import { useSearchHistory, SearchEntry } from '@/hooks/useSearchHistory';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('current');
   const { theme, toggleTheme } = useTheme();
+  const searchHistory = useSearchHistory();
+  const [historyOpen, setHistoryOpen] = useState(false);
+  // Key to force re-mount of CurrentFocusPanel when a history entry is selected
+  const [panelKey, setPanelKey] = useState(0);
+  const [selectedLocation, setSelectedLocation] = useState<string | undefined>();
+
+  const handleDataFetched = useCallback(
+    (location: string, concern: string, data: EnvironmentData) => {
+      searchHistory.addEntry(location, concern, data);
+    },
+    [searchHistory]
+  );
+
+  const handleHistorySelect = useCallback(
+    (entry: SearchEntry) => {
+      setSelectedLocation(entry.location);
+      setPanelKey((k) => k + 1);
+      setActiveTab('current');
+      setHistoryOpen(false);
+    },
+    []
+  );
 
   return (
     <main className="flex min-h-screen w-full relative bg-[var(--color-bg-base)]">
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} theme={theme} toggleTheme={toggleTheme} />
+      <Sidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        theme={theme}
+        toggleTheme={toggleTheme}
+        historyCount={searchHistory.history.length}
+        onOpenHistory={() => setHistoryOpen(true)}
+      />
 
       {/* Main Content — offset by sidebar width on desktop */}
       <div className="flex-1 w-full md:ml-[260px] p-6 pt-8 md:p-12 max-w-4xl mx-auto flex flex-col items-center pb-28 md:pb-12">
@@ -54,10 +85,28 @@ export default function Home() {
         </header>
 
         {/* Tab Panels */}
-        {activeTab === 'current' && <CurrentFocusPanel envData={null} />}
+        {activeTab === 'current' && (
+          <CurrentFocusPanel
+            key={panelKey}
+            envData={null}
+            onDataFetched={handleDataFetched}
+            initialLocation={selectedLocation}
+          />
+        )}
         {activeTab === 'future' && <FutureSimulatorPanel />}
         {activeTab === 'chat' && <ChatPanel />}
       </div>
+
+      {/* Search History Panel */}
+      <SearchHistoryPanel
+        history={searchHistory.history}
+        onSelect={handleHistorySelect}
+        onTogglePin={searchHistory.togglePin}
+        onRemove={searchHistory.removeEntry}
+        onClear={searchHistory.clearHistory}
+        isOpen={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+      />
     </main>
   );
 }

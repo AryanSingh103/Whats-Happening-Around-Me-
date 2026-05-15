@@ -6,10 +6,12 @@ import { MetricCard } from '@/components/ui/MetricCard';
 import { LoadingShimmer } from '@/components/ui/LoadingShimmer';
 import { ErrorBanner } from '@/components/ui/ErrorBanner';
 import { EnvironmentData } from '@/types';
+import { useCallback, useEffect } from 'react';
 
 interface CurrentFocusPanelProps {
   envData: EnvironmentData | null;
-  onDataUpdate?: (data: EnvironmentData | null, location: string) => void;
+  onDataFetched?: (location: string, concern: string, data: EnvironmentData) => void;
+  initialLocation?: string;
 }
 
 function getAqiColor(aqi: number): string {
@@ -34,7 +36,7 @@ function getTempColor(temp: number): string {
   return 'text-cyan-400';
 }
 
-export function CurrentFocusPanel({ onDataUpdate }: CurrentFocusPanelProps) {
+export function CurrentFocusPanel({ onDataFetched, initialLocation }: CurrentFocusPanelProps) {
   const {
     location,
     setLocation,
@@ -48,17 +50,21 @@ export function CurrentFocusPanel({ onDataUpdate }: CurrentFocusPanelProps) {
     handleSubmit,
     handleLocateMe,
     fetchData,
-  } = useEnvironmentData();
+  } = useEnvironmentData(onDataFetched);
 
-  // Propagate data up to parent when it changes
-  const handleFormSubmit = async (e: React.FormEvent) => {
+  const handleFormSubmit = useCallback(async (e: React.FormEvent) => {
     await handleSubmit(e);
-  };
+  }, [handleSubmit]);
 
-  // Use effect-like propagation through onDataUpdate
-  if (onDataUpdate && envData) {
-    // We'll use a ref or callback pattern instead
-  }
+  // If an initial location is provided (e.g. from history), auto-fetch it
+  useEffect(() => {
+    if (initialLocation) {
+      setLocation(initialLocation);
+      fetchData(initialLocation);
+    }
+    // Only run on mount (initialLocation doesn't change after mount)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const aqiSeverity = envData ? getAqiSeverity(envData.aqi) : null;
 
