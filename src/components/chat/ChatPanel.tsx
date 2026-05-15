@@ -4,6 +4,8 @@ import { useChat } from '@/hooks/useChat';
 import { CHAT_STARTER_QUESTIONS } from '@/lib/constants';
 import { EnvironmentData } from '@/types';
 import { exportChat } from '@/lib/export';
+import ReactMarkdown from 'react-markdown';
+import { useState, useEffect } from 'react';
 
 interface ChatPanelProps {
   envData?: EnvironmentData | null;
@@ -22,8 +24,54 @@ function getMessageText(msg: any): string {
   return msg.content || '';
 }
 
+const FOLLOW_UP_SUGGESTIONS: Record<string, string[]> = {
+  aqi: [
+    'How can I protect myself from poor air quality?',
+    'What causes AQI to spike?',
+    'Compare indoor vs outdoor air quality',
+  ],
+  temperature: [
+    'What are the health effects of extreme heat?',
+    'How do cities make heat waves worse?',
+    'What\'s the urban heat island effect?',
+  ],
+  general: [
+    'How does climate change affect my area?',
+    'What can I do to reduce my environmental impact?',
+    'Explain the greenhouse effect simply',
+  ],
+};
+
+function getFollowUps(messages: any[]): string[] {
+  if (messages.length < 2) return [];
+
+  // Look at the last few messages for topic hints
+  const recentTexts = messages
+    .slice(-3)
+    .map((m: any) => getMessageText(m).toLowerCase())
+    .join(' ');
+
+  if (recentTexts.includes('aqi') || recentTexts.includes('air quality') || recentTexts.includes('pollution')) {
+    return FOLLOW_UP_SUGGESTIONS.aqi;
+  }
+  if (recentTexts.includes('temperature') || recentTexts.includes('heat') || recentTexts.includes('hot')) {
+    return FOLLOW_UP_SUGGESTIONS.temperature;
+  }
+  return FOLLOW_UP_SUGGESTIONS.general;
+}
+
 export function ChatPanel({ envData, location }: ChatPanelProps) {
   const chat = useChat(envData);
+  const [followUps, setFollowUps] = useState<string[]>([]);
+
+  // Update follow-ups when messages change and we're not loading
+  useEffect(() => {
+    if (!chat.isLoading && chat.messages.length > 1) {
+      setFollowUps(getFollowUps(chat.messages));
+    } else {
+      setFollowUps([]);
+    }
+  }, [chat.messages, chat.isLoading]);
 
   return (
     <div className="w-full h-[calc(100vh-180px)] md:h-[75vh] flex flex-col bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-2xl shadow-2xl animate-fade-in overflow-hidden mb-20 md:mb-8">
@@ -79,7 +127,36 @@ export function ChatPanel({ envData, location }: ChatPanelProps) {
                 {role === 'assistant' && (
                   <div className="text-xs text-[var(--color-text-muted)] font-semibold mb-1 uppercase tracking-wider">Assistant</div>
                 )}
-                <div className="whitespace-pre-wrap leading-relaxed">{text}</div>
+                {role === 'assistant' ? (
+                  <div className="prose-chat leading-relaxed">
+                    <ReactMarkdown
+                      components={{
+                        p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                        strong: ({ children }) => <strong className="font-bold text-white">{children}</strong>,
+                        em: ({ children }) => <em className="italic text-emerald-300">{children}</em>,
+                        ul: ({ children }) => <ul className="list-disc list-inside mb-2 space-y-1">{children}</ul>,
+                        ol: ({ children }) => <ol className="list-decimal list-inside mb-2 space-y-1">{children}</ol>,
+                        li: ({ children }) => <li className="text-[var(--color-text-primary)]">{children}</li>,
+                        code: ({ children }) => (
+                          <code className="bg-black/30 px-1.5 py-0.5 rounded text-xs font-mono text-emerald-300">{children}</code>
+                        ),
+                        h1: ({ children }) => <h3 className="text-lg font-bold text-white mb-2 mt-3">{children}</h3>,
+                        h2: ({ children }) => <h4 className="text-base font-bold text-white mb-1.5 mt-2">{children}</h4>,
+                        h3: ({ children }) => <h5 className="text-sm font-bold text-white mb-1 mt-2">{children}</h5>,
+                        a: ({ href, children }) => (
+                          <a href={href} target="_blank" rel="noopener noreferrer" className="text-emerald-400 underline hover:text-emerald-300 transition-colors">{children}</a>
+                        ),
+                        blockquote: ({ children }) => (
+                          <blockquote className="border-l-2 border-emerald-500/50 pl-3 italic text-[var(--color-text-secondary)] my-2">{children}</blockquote>
+                        ),
+                      }}
+                    >
+                      {text}
+                    </ReactMarkdown>
+                  </div>
+                ) : (
+                  <div className="whitespace-pre-wrap leading-relaxed">{text}</div>
+                )}
               </div>
             </div>
           );
@@ -97,6 +174,24 @@ export function ChatPanel({ envData, location }: ChatPanelProps) {
                 {q}
               </button>
             ))}
+          </div>
+        )}
+
+        {/* Suggested Follow-ups */}
+        {followUps.length > 0 && !chat.isLoading && (
+          <div className="animate-fade-in">
+            <p className="text-xs text-[var(--color-text-muted)] mb-2 font-semibold uppercase tracking-wider">Suggested follow-ups</p>
+            <div className="flex flex-wrap gap-2">
+              {followUps.map((q) => (
+                <button
+                  key={q}
+                  onClick={() => chat.sendMessage(q)}
+                  className="px-3 py-1.5 bg-emerald-500/5 border border-emerald-500/20 rounded-lg text-xs text-emerald-400 hover:bg-emerald-500/15 hover:text-emerald-300 hover:border-emerald-500/40 transition-all"
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
