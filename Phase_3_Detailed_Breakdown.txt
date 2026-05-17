@@ -1,0 +1,106 @@
+========================================================================
+PHASE 3 DETAILED BREAKDOWN: Research & User Value Features
+========================================================================
+
+1. HIGH-LEVEL SUMMARY
+------------------------------------------------------------------------
+Phase 3 transformed the application from a simple weather-like dashboard into a deeper research and comparison tool. We added the ability to persist and pin past searches (Search History), export data for external use (CSV/JSON/PDF/Chat Export), visualize side-by-side data for two locations (Comparison Mode), view realistic generated 7-day past trends (Historical Trend Chart), dynamically respond to dangerous environmental metrics with pulse alerts (Notification System), and interact with a richer AI assistant equipped with markdown rendering and suggested follow-ups.
+
+
+2. EACH NEW FEATURE EXPLAINED ONE-BY-ONE
+------------------------------------------------------------------------
+A. Search History & Favorites: Automatically tracks the last 20 location queries, preventing duplicates. Users can "pin" searches to keep them permanently, providing a quick access list from a slide-in sidebar.
+B. Location Comparison Mode: A new main tab allowing users to query two distinct cities side-by-side to visually compare their environmental metrics and AI explanations.
+C. Data Export: Simple buttons beneath the Current Focus panel that compile the current location's environmental data and explanation into a downloaded CSV, JSON, or a formatted PDF print window. Chat conversations can also be exported.
+D. Historical Trend View: A new line chart under the Current Focus panel that uses `recharts` to render a 7-day look-back of Temperature, AQI, and Humidity. 
+E. Enhanced Eco-Assistant: The chat interface now parses Markdown (bold, lists, code) and suggests three context-aware follow-up queries after the AI responds based on whether the topic leans toward AQI, heat, or general climate.
+F. Notification / Alert System: The Current Focus panel now evaluates Temperature, AQI, Humidity, and Wind against strict threshold boundaries, rendering multi-line alert banners with pulse animations for dangerous levels.
+
+
+3. WHAT FILES WERE CHANGED AND WHY
+------------------------------------------------------------------------
+- `src/types/index.ts`: Added `'compare'` to the `ActiveTab` type to support the new comparison view routing.
+- `src/app/globals.css`: Added `@keyframes slide-in-right` and `.animate-slide-in-right` for the history panel and comparison panel animations.
+- `src/app/page.tsx`: Updated to handle routing for the `LocationComparisonPanel` and `SearchHistoryPanel`, managing the state of the history hook at the top level.
+- `src/hooks/useEnvironmentData.ts`: Updated to accept an optional `onDataFetched` callback, allowing the history system to passively listen and record successful fetches.
+- `src/components/layout/Sidebar.tsx`: Added the Compare tab to the main nav and a History button.
+- `src/components/current/CurrentFocusPanel.tsx`: Refactored to include the alert mapping system, export buttons, and the embedded `HistoricalTrendChart`.
+- `src/components/chat/ChatPanel.tsx`: Overhauled the message rendering loop to use `ReactMarkdown`, integrated `exportChat`, and added state for dynamic follow-up chips.
+
+
+4. NEW COMPONENTS, FUNCTIONS, HOOKS, APIs
+------------------------------------------------------------------------
+- `useSearchHistory` (Hook): Manages `localStorage` reads/writes for tracking location queries, deduplication, and pin toggling.
+- `SearchHistoryPanel` (Component): A slide-in drawer rendering the history entries with AQI badges and relative timestamps.
+- `LocationComparisonPanel` (Component): Renders two forms and two data panels side-by-side using two independent `useEnvironmentData` instances.
+- `HistoricalTrendChart` (Component): An isolated Recharts component.
+- `export.ts` (Utility): Contains `exportCSV`, `exportJSON`, `exportPDF`, and `exportChat` functions. The PDF exporter constructs an HTML string and opens a print-ready window.
+- `getAlerts()` (Function): A pure function added to `CurrentFocusPanel` that maps raw `EnvironmentData` to an array of actionable `Alert` objects.
+
+
+5. HOW DATA FLOWS THROUGH THE NEW FEATURES
+------------------------------------------------------------------------
+- History Data Flow: When `CurrentFocusPanel` triggers `fetchData` in `useEnvironmentData`, upon success, it fires the `onDataFetched` callback. `page.tsx` catches this and calls `searchHistory.addEntry()`, which serializes the current state into `localStorage`. When a user clicks a history entry, `page.tsx` passes that location as `initialLocation` down to `CurrentFocusPanel`, triggering a `useEffect` that instantly fetches it.
+- Comparison Data Flow: `LocationComparisonPanel` calls `const loc1 = useEnvironmentData()` and `const loc2 = useEnvironmentData()`. Because hooks maintain isolated state, `loc1` and `loc2` function perfectly independently, allowing dual API calls without conflict.
+- Chart Data Flow: `CurrentFocusPanel` passes its active `envData` to `HistoricalTrendChart`. Inside the chart, a `useMemo` block catches this and runs `generateHistoricalData()`, creating a 7-element array plotting variance over the past 7 days, which is fed directly into `<LineChart>`.
+
+
+6. UI CHANGES AND USER INTERACTION
+------------------------------------------------------------------------
+- A new "Compare Locations" button resides in the sidebar/bottom nav.
+- A "History" button with a dynamic badge count was added to the sidebar. Clicking it dims the background and slides in a panel from the right.
+- Chat bubbles now feature rich text formatting. Clickable suggestion chips appear under the latest message.
+- Below the explanation card in the Current Focus view, users now see three distinct export buttons (CSV, JSON, PDF).
+- Dangerous metrics (like AQI > 200 or Temp > 40C) cause prominent alert banners to stack beneath the form input, pulsing red/purple to capture attention.
+
+
+7. BACKEND / SERVER / API CHANGES
+------------------------------------------------------------------------
+- No Next.js API routes were fundamentally altered. The historical trend data is currently generated algorithmically on the client side based on the real-time fetch to avoid paid API tiers. 
+
+
+8. STATE MANAGEMENT CHANGES
+------------------------------------------------------------------------
+- `page.tsx` now owns the `SearchHistory` hook state, passing history data down to the drawer and handling the "select history item" event to synchronize the `CurrentFocusPanel`.
+- To force `CurrentFocusPanel` to reset and mount smoothly when a user selects a history item, a `key={panelKey}` state was added in `page.tsx` that increments on selection.
+- `ChatPanel` added a new `followUps` array to local state, populated by a `useEffect` that evaluates the last 3 messages whenever `chat.messages` updates.
+
+
+9. DATABASE / SCHEMA / CONFIG / ENV CHANGES
+------------------------------------------------------------------------
+- No external databases were added. The schema for the history feature is managed entirely in `localStorage` under the key `wham_search_history`.
+- Installed `react-markdown` and `recharts` to `package.json`. No new env variables are required.
+
+
+10. IMPORTANT LOGIC OR EDGE CASES HANDLED
+------------------------------------------------------------------------
+- Deduplication: When `useSearchHistory` adds an entry, it filters out previous searches for the exact same location string (case-insensitive) so the list doesn't get spammed by re-searches, keeping only the newest.
+- Trim Logic: The history explicitly retains pinned items but trims unpinned items to ensure the array length never exceeds 20 elements (to save localStorage space).
+- Recharts Hydration: The `HistoricalTrendChart` logic runs inside `useMemo` anchored to the parent's data to ensure the chart doesn't randomly re-calculate its noise patterns on generic re-renders.
+
+
+11. HOW THE NEW CODE CONNECTS TO THE EXISTING CODEBASE
+------------------------------------------------------------------------
+- Phase 3 was built as an extension of the Component/Hook architecture established in Phase 1. Export features, charts, and alert algorithms operate as functional "decorators" around the pre-existing `EnvironmentData` type. The `useEnvironmentData` hook proved modular enough to be instantly reused for the `LocationComparisonPanel`.
+
+
+12. ASSUMPTIONS MADE WHILE IMPLEMENTING
+------------------------------------------------------------------------
+- I assumed that "Historical Trends" meant visualizing past data. Because free APIs rarely provide 7-day retrospective data, I built a deterministic algorithm that uses the current day's data to back-cast a realistic 7-day trend (using pseudo-random noise anchored to the current value).
+- I assumed the user would prefer PDF exports to be handled natively via the browser's high-quality print engine rather than pulling in a heavy external PDF rendering library like `jspdf`.
+
+
+13. WHAT YOU SHOULD TEST MANUALLY
+------------------------------------------------------------------------
+- Open the History Panel, search for a city, pin it, clear history, and ensure the pinned city remains.
+- In `Compare Locations`, enter "Dubai" and "Anchorage" simultaneously to see two vastly different locations load and trigger their respective independent alert banners.
+- In `Current Focus`, click the "PDF Report" button and ensure the new window opens correctly formatted for printing.
+- In `Eco-Assistant`, type a message about "air pollution", wait for the response, and verify the follow-up chips explicitly relate to AQI/health.
+
+
+14. BUGS, LIMITATIONS, OR FUTURE IMPROVEMENTS
+------------------------------------------------------------------------
+- Limitation: The 7-day Historical Trend Chart uses mocked retrospective data derived from the current API reading. In a production setting with a paid subscription, this component should hit a real `/api/history` endpoint.
+- Limitation: The `localStorage` history is isolated to the browser. If the user clears browser data or switches devices, history is lost.
+- Future Improvement: Add a map visualizer to the Comparison Panel so users can visually see the geographical difference between the two locations.
+- Future Improvement: Chat export is currently just plain text `.txt`. It could be enhanced to export as a formatted PDF or Markdown file.
