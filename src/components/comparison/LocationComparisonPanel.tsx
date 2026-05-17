@@ -39,9 +39,10 @@ export function LocationComparisonPanel() {
   return (
     <div className="w-full animate-fade-in flex flex-col gap-8">
       {/* ── Input Section ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-2xl p-6 shadow-2xl">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full glass-panel rounded-2xl p-6 shadow-2xl relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none"></div>
         {/* Location 1 Input */}
-        <div className="space-y-4">
+        <div className="space-y-4 relative z-10">
           <h2 className="text-lg font-bold text-white flex items-center gap-2">
             <span>📍</span> Location A
           </h2>
@@ -56,7 +57,7 @@ export function LocationComparisonPanel() {
             <button
               type="submit"
               disabled={loc1.loading || !loc1.location.trim()}
-              className="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 px-6 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-[0_0_15px_rgba(37,99,235,0.6)] shadow-blue-500/30 border border-white/10 hover:shadow-[0_0_25px_rgba(37,99,235,0.8)] hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
             >
               Load
             </button>
@@ -65,7 +66,7 @@ export function LocationComparisonPanel() {
         </div>
 
         {/* Location 2 Input */}
-        <div className="space-y-4 md:border-l md:border-[var(--color-border)] md:pl-6">
+        <div className="space-y-4 md:border-l md:border-[var(--color-border)] md:pl-6 relative z-10">
           <h2 className="text-lg font-bold text-white flex items-center gap-2">
             <span>📍</span> Location B
           </h2>
@@ -80,7 +81,7 @@ export function LocationComparisonPanel() {
             <button
               type="submit"
               disabled={loc2.loading || !loc2.location.trim()}
-              className="bg-purple-600 hover:bg-purple-500 text-white font-semibold py-3 px-6 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-purple-600 hover:bg-purple-500 text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-[0_0_15px_rgba(147,51,234,0.6)] shadow-purple-500/30 border border-white/10 hover:shadow-[0_0_25px_rgba(147,51,234,0.8)] hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
             >
               Load
             </button>
@@ -111,12 +112,12 @@ export function LocationComparisonPanel() {
                 <MetricCard label="Humidity" value={`${loc1.envData.humidity}`} unit="%" colorClass={getHumidityColor(loc1.envData.humidity)} />
                 <MetricCard label="Wind" value={`${loc1.envData.windSpeed}`} unit="m/s" colorClass={getWindColor(loc1.envData.windSpeed)} />
               </div>
-              <div className="bg-[var(--color-info-bg)] border border-blue-500/30 p-5 rounded-2xl">
+              <div className="bg-[var(--color-info-bg)] backdrop-blur-xl border border-blue-500/30 p-5 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.2)]">
                 <p className="text-[var(--color-text-primary)] text-sm leading-relaxed">{loc1.explanation}</p>
               </div>
             </div>
           ) : (
-            <div className="h-full border-2 border-dashed border-[var(--color-border)] rounded-2xl flex items-center justify-center p-8 text-center min-h-[300px]">
+            <div className="h-full glass-panel border-dashed rounded-2xl flex items-center justify-center p-8 text-center min-h-[300px]">
               <p className="text-[var(--color-text-muted)]">Search Location A to see data</p>
             </div>
           )}
@@ -142,12 +143,12 @@ export function LocationComparisonPanel() {
                 <MetricCard label="Humidity" value={`${loc2.envData.humidity}`} unit="%" colorClass={getHumidityColor(loc2.envData.humidity)} />
                 <MetricCard label="Wind" value={`${loc2.envData.windSpeed}`} unit="m/s" colorClass={getWindColor(loc2.envData.windSpeed)} />
               </div>
-              <div className="bg-[var(--color-info-bg)] border border-purple-500/30 p-5 rounded-2xl">
+              <div className="bg-[var(--color-info-bg)] backdrop-blur-xl border border-purple-500/30 p-5 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.2)]">
                 <p className="text-[var(--color-text-primary)] text-sm leading-relaxed">{loc2.explanation}</p>
               </div>
             </div>
           ) : (
-            <div className="h-full border-2 border-dashed border-[var(--color-border)] rounded-2xl flex items-center justify-center p-8 text-center min-h-[300px]">
+            <div className="h-full glass-panel border-dashed rounded-2xl flex items-center justify-center p-8 text-center min-h-[300px]">
               <p className="text-[var(--color-text-muted)]">Search Location B to see data</p>
             </div>
           )}

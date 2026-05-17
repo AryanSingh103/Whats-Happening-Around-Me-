@@ -54,9 +54,9 @@ export function SearchHistoryPanel({
       />
 
       {/* Panel */}
-      <div className="fixed top-0 right-0 h-full w-full max-w-md bg-[var(--color-bg-card)] border-l border-[var(--color-border)] z-50 shadow-2xl flex flex-col animate-slide-in-right">
+      <div className="fixed top-0 right-0 h-full w-full max-w-md bg-[var(--color-bg-card)] backdrop-blur-3xl border-l border-[var(--color-border)] z-50 shadow-[-10px_0_40px_rgba(0,0,0,0.2)] flex flex-col animate-slide-in-right">
         {/* Header */}
-        <div className="p-5 border-b border-[var(--color-border)] flex items-center justify-between shrink-0">
+        <div className="p-5 border-b border-[var(--color-border)] bg-[var(--color-bg-card)]/30 flex items-center justify-between shrink-0">
           <div>
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
               <span>📋</span> Search History
@@ -104,10 +104,10 @@ export function SearchHistoryPanel({
                 return (
                   <div
                     key={entry.id}
-                    className={`group relative rounded-xl border transition-all cursor-pointer hover:shadow-md ${
+                    className={`group relative rounded-xl border transition-all cursor-pointer hover:shadow-lg ${
                       entry.pinned
-                        ? 'bg-[var(--color-accent)]/5 border-[var(--color-accent)]/20 hover:border-[var(--color-accent)]/40'
-                        : 'bg-[var(--color-bg-input)] border-[var(--color-border)] hover:border-[var(--color-accent)]/30'
+                        ? 'bg-[var(--color-accent)]/10 backdrop-blur-md border-[var(--color-accent)]/30 hover:border-[var(--color-accent)]/50'
+                        : 'bg-[var(--color-bg-input)]/80 backdrop-blur-md border-[var(--color-border)] hover:border-[var(--color-accent)]/40 hover:shadow-[0_0_15px_var(--color-accent)] hover:shadow-[var(--color-accent)]/10'
                     }`}
                   >
                     <div

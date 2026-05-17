@@ -38,7 +38,11 @@ export default function Home() {
   );
 
   return (
-    <main className="flex min-h-screen w-full relative bg-[var(--color-bg-base)]">
+    <main className="flex min-h-screen w-full relative bg-[var(--color-bg-base)] overflow-x-hidden">
+      {/* ── Animated Background ── */}
+      <div className="mesh-blob mesh-blob-1"></div>
+      <div className="mesh-blob mesh-blob-2"></div>
+
       <Sidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}

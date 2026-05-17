@@ -18,10 +18,10 @@ async function fetchWithTimeout(
   url: string,
   options: FetchOptions = {}
 ): Promise<Response> {
-  const { timeout = 15000, ...fetchOptions } = options;
+  const { timeout = 45000, ...fetchOptions } = options;
 
   const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
+  const id = setTimeout(() => controller.abort(new Error(`Request timed out after ${timeout}ms`)), timeout);
 
   try {
     const response = await fetch(url, {

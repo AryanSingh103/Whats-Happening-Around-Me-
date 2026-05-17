@@ -4,9 +4,9 @@
 @theme {
   --color-bg: #0f1729;
   --color-bg-base: #0f1729;
-  --color-bg-card: #1a2340;
-  --color-bg-input: #131b30;
-  --color-border: #2a3558;
+  --color-bg-card: rgba(26, 35, 64, 0.65);
+  --color-bg-input: rgba(19, 27, 48, 0.5);
+  --color-border: rgba(42, 53, 88, 0.5);
   --color-border-focus: #6366f1;
   --color-text-primary: #e2e8f0;
   --color-text-secondary: #94a3b8;
@@ -25,9 +25,9 @@
 :root[data-theme="light"] {
   --color-bg: #f1f5f9;
   --color-bg-base: #f1f5f9;
-  --color-bg-card: #ffffff;
-  --color-bg-input: #f8fafc;
-  --color-border: #e2e8f0;
+  --color-bg-card: rgba(255, 255, 255, 0.6);
+  --color-bg-input: rgba(248, 250, 252, 0.5);
+  --color-border: rgba(226, 232, 240, 0.6);
   --color-border-focus: #6366f1;
   --color-text-primary: #1e293b;
   --color-text-secondary: #475569;
@@ -159,3 +159,62 @@ body {
   outline-offset: 2px;
   border-radius: 4px;
 }
+
+/* ── Glassmorphism Utilities ── */
+.glass-panel {
+  background: var(--color-bg-card);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+}
+
+:root[data-theme="light"] .glass-panel {
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* ── Mesh Background Animation ── */
+@keyframes mesh-blob-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+}
+
+@keyframes mesh-blob-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-30px, 50px) scale(0.9); }
+  66% { transform: translate(20px, -20px) scale(1.1); }
+}
+
+.mesh-blob {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.4;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.mesh-blob-1 {
+  top: -10%;
+  left: -10%;
+  width: 50vw;
+  height: 50vw;
+  background: radial-gradient(circle, var(--color-accent) 0%, transparent 70%);
+  animation: mesh-blob-1 20s infinite ease-in-out;
+}
+
+.mesh-blob-2 {
+  bottom: -10%;
+  right: -10%;
+  width: 60vw;
+  height: 60vw;
+  background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
+  animation: mesh-blob-2 25s infinite ease-in-out;
+  animation-delay: -5s;
+}
+
+:root[data-theme="light"] .mesh-blob {
+  opacity: 0.25;
+}
+

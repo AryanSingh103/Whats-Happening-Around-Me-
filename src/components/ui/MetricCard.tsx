@@ -61,9 +61,10 @@ export function MetricCard({
 
   return (
     <div
-      className="bg-[var(--color-bg-card)] border border-[var(--color-border)] p-4 rounded-xl text-center hover:border-[var(--color-accent)]/50 transition-all duration-300 hover:shadow-lg hover:shadow-[var(--color-accent)]/5 hover:-translate-y-1 group animate-fade-in"
+      className="glass-panel p-4 rounded-xl text-center hover:border-[var(--color-accent)]/50 transition-all duration-300 hover:shadow-[0_0_15px_var(--color-accent)] hover:shadow-[var(--color-accent)]/20 hover:-translate-y-1.5 group animate-fade-in relative overflow-hidden"
       style={{ animationDelay: `${delay}ms` }}
     >
+      <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
       <p className="text-sm text-[var(--color-text-muted)] mb-1 group-hover:text-[var(--color-text-secondary)] transition-colors">
         {label}
       </p>

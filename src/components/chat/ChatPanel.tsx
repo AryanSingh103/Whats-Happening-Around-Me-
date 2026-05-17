@@ -74,15 +74,19 @@ export function ChatPanel({ envData, location }: ChatPanelProps) {
   }, [chat.messages, chat.isLoading]);
 
   return (
-    <div className="w-full h-[calc(100vh-180px)] md:h-[75vh] flex flex-col bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-2xl shadow-2xl animate-fade-in overflow-hidden mb-20 md:mb-8">
+    <div className="w-full h-[600px] md:h-[700px] max-h-[80vh] flex flex-col glass-panel rounded-2xl overflow-hidden shadow-2xl animate-fade-in relative z-10">
+      <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none"></div>
+      
       {/* Header */}
-      <div className="bg-emerald-600/10 border-b border-[var(--color-border)] p-4 md:px-6 shrink-0 flex items-center gap-3">
-        <span className="text-2xl">💬</span>
-        <div>
-          <h2 className="text-white font-bold tracking-tight">Eco-Assistant</h2>
-          <p className="text-emerald-400 text-xs font-medium">
-            {chat.isStreaming ? '● Streaming...' : 'Powered by AI'}
-          </p>
+      <div className="p-4 border-b border-[var(--color-border)] bg-[var(--color-bg-card)]/50 backdrop-blur-md flex justify-between items-center relative z-10">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">💬</span>
+          <div>
+            <h2 className="text-white font-bold tracking-tight">Eco-Assistant</h2>
+            <p className="text-emerald-400 text-xs font-medium">
+              {chat.isStreaming ? '● Streaming...' : 'Powered by AI'}
+            </p>
+          </div>
         </div>
         {envData && location && (
           <span className="ml-auto text-xs bg-emerald-500/20 text-emerald-300 px-3 py-1.5 rounded-full border border-emerald-500/30 hidden sm:block">
@@ -111,7 +115,7 @@ export function ChatPanel({ envData, location }: ChatPanelProps) {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 bg-black/20 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 custom-scrollbar relative z-10">
         {chat.messages.map((msg, i) => {
           const text = getMessageText(msg);
           if (!text) return null;
@@ -119,16 +123,12 @@ export function ChatPanel({ envData, location }: ChatPanelProps) {
 
           return (
             <div key={msg.id || i} className={`flex ${role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
-              <div className={`max-w-[85%] md:max-w-[75%] rounded-2xl p-4 ${
-                role === 'user'
-                  ? 'bg-emerald-600 text-white rounded-tr-sm shadow-md'
-                  : 'bg-[var(--color-bg-input)] border border-[var(--color-border)] text-[var(--color-text-primary)] rounded-tl-sm shadow-sm'
-              }`}>
+              <div className={`max-w-[85%] md:max-w-[75%]`}>
                 {role === 'assistant' && (
-                  <div className="text-xs text-[var(--color-text-muted)] font-semibold mb-1 uppercase tracking-wider">Assistant</div>
+                  <div className="text-xs text-[var(--color-text-muted)] font-semibold mb-1 uppercase tracking-wider ml-1">Assistant</div>
                 )}
                 {role === 'assistant' ? (
-                  <div className="prose-chat leading-relaxed">
+                  <div className="prose-chat leading-relaxed bg-[var(--color-bg-input)]/80 backdrop-blur-md border border-[var(--color-border)] text-[var(--color-text-primary)] rounded-2xl rounded-tl-sm shadow-[0_4px_20px_rgba(0,0,0,0.15)] p-4">
                     <ReactMarkdown
                       components={{
                         p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
@@ -155,8 +155,9 @@ export function ChatPanel({ envData, location }: ChatPanelProps) {
                     </ReactMarkdown>
                   </div>
                 ) : (
-                  <div className="whitespace-pre-wrap leading-relaxed">{text}</div>
-                )}
+                  <div className="bg-emerald-600/90 text-white p-3 md:p-4 rounded-2xl rounded-tr-sm shadow-[0_4px_15px_rgba(5,150,105,0.3)] border border-emerald-500/30">
+                  <div className="whitespace-pre-wrap leading-relaxed">{msg.content}</div>
+                </div>)}
               </div>
             </div>
           );
@@ -198,7 +199,7 @@ export function ChatPanel({ envData, location }: ChatPanelProps) {
         {/* Thinking indicator (before stream starts) */}
         {chat.isLoading && !chat.isStreaming && (
           <div className="flex justify-start animate-fade-in">
-            <div className="bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-2xl rounded-tl-sm p-4 shadow-sm flex gap-2 items-center">
+                <div className="bg-[var(--color-bg-input)]/80 backdrop-blur-md border border-[var(--color-border)] p-4 md:p-5 rounded-2xl rounded-tl-sm shadow-[0_4px_20px_rgba(0,0,0,0.15)] text-[var(--color-text-primary)]">
               <div className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
               <div className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
               <div className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce"></div>
@@ -210,9 +211,9 @@ export function ChatPanel({ envData, location }: ChatPanelProps) {
       </div>
 
       {/* Input */}
-      <div className="p-4 bg-[var(--color-bg-card)] border-t border-[var(--color-border)] shrink-0">
+      <div className="p-4 bg-[var(--color-bg-card)]/50 backdrop-blur-md border-t border-[var(--color-border)] shrink-0 relative z-10">
         {chat.error && <div className="text-red-400 text-sm mb-2 text-center">{chat.error}</div>}
-        <form onSubmit={chat.handleSubmit} className="flex gap-2">
+        <form onSubmit={chat.handleSubmit} className="flex gap-2 relative">
           <input
             type="text"
             value={chat.input}
@@ -225,7 +226,7 @@ export function ChatPanel({ envData, location }: ChatPanelProps) {
           <button
             type="submit"
             disabled={chat.isLoading || !chat.input.trim()}
-            className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 px-6 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shrink-0 hover:shadow-lg hover:shadow-emerald-500/20 active:scale-[0.98]"
+            className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-[0_0_15px_rgba(5,150,105,0.6)] shadow-emerald-500/30 border border-white/10 hover:shadow-[0_0_25px_rgba(5,150,105,0.8)] hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 shrink-0"
             aria-label="Send message"
           >
             Send

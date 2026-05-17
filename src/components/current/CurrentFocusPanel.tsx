@@ -123,10 +123,11 @@ export function CurrentFocusPanel({ onDataFetched, initialLocation }: CurrentFoc
   const alerts = envData ? getAlerts(envData) : [];
 
   return (
-    <div className="w-full animate-fade-in">
+    <div className="w-full animate-fade-in relative z-10">
       {/* ── Input Card ── */}
-      <div className="w-full bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-2xl p-6 md:p-8 shadow-2xl mb-8">
-        <form onSubmit={handleFormSubmit} className="flex flex-col md:flex-row gap-4">
+      <div className="w-full glass-panel rounded-2xl p-6 md:p-8 mb-8 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none"></div>
+        <form onSubmit={handleFormSubmit} className="flex flex-col md:flex-row gap-4 relative z-10">
           <div className="flex-1">
             <div className="flex justify-between items-center mb-2">
               <label htmlFor="location-input" className="block text-sm font-medium text-[var(--color-text-muted)]">Where are you?</label>
@@ -177,8 +178,8 @@ export function CurrentFocusPanel({ onDataFetched, initialLocation }: CurrentFoc
           <div className="flex items-end">
             <button
               type="submit"
-              disabled={loading || !location.trim()}
-              className="w-full md:w-auto bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white font-semibold py-3 px-8 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 h-[48px] hover:shadow-lg hover:shadow-[var(--color-accent)]/20 active:scale-[0.98]"
+              disabled={loading}
+              className="mt-6 md:mt-7 w-full md:w-auto bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white font-semibold py-3 px-8 rounded-xl transition-all shadow-[0_0_15px_var(--color-accent)] shadow-[var(--color-accent)]/30 border border-white/10 hover:shadow-[0_0_25px_var(--color-accent)] hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
             >
               {loading ? (
                 <>
@@ -211,7 +212,7 @@ export function CurrentFocusPanel({ onDataFetched, initialLocation }: CurrentFoc
                   setLocation(city);
                   fetchData(city);
                 }}
-                className="px-4 py-2 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-full text-sm text-[var(--color-text-secondary)] hover:text-white hover:border-[var(--color-accent)]/50 transition-all hover:shadow-md"
+                className="px-4 py-2 glass-panel rounded-full text-sm text-[var(--color-text-secondary)] hover:text-white hover:border-[var(--color-accent)]/50 transition-all hover:shadow-[0_0_15px_var(--color-accent)] hover:shadow-[var(--color-accent)]/20 hover:-translate-y-0.5"
               >
                 {city}
               </button>
@@ -260,8 +261,8 @@ export function CurrentFocusPanel({ onDataFetched, initialLocation }: CurrentFoc
           </div>
 
           {/* Explanation Card */}
-          <div className="bg-[var(--color-info-bg)] border border-[var(--color-accent)]/30 p-6 md:p-8 rounded-2xl relative overflow-hidden animate-fade-in" style={{ animationDelay: '300ms' }}>
-            <div className="absolute top-0 left-0 w-1 h-full bg-[var(--color-accent)]"></div>
+          <div className="bg-[var(--color-info-bg)] backdrop-blur-xl border border-[var(--color-accent)]/30 p-6 md:p-8 rounded-2xl relative overflow-hidden animate-fade-in shadow-[0_8px_32px_rgba(0,0,0,0.2)]" style={{ animationDelay: '300ms' }}>
+            <div className="absolute top-0 left-0 w-1 h-full bg-[var(--color-accent)] shadow-[0_0_15px_var(--color-accent)]"></div>
             <div className="flex items-start gap-4">
               <div className="bg-[var(--color-accent)] text-white p-2.5 rounded-lg mt-0.5 shrink-0 shadow-lg shadow-[var(--color-accent)]/20">💡</div>
               <div>
@@ -282,7 +283,7 @@ export function CurrentFocusPanel({ onDataFetched, initialLocation }: CurrentFoc
           <div className="flex flex-wrap gap-2 pt-2 animate-fade-in" style={{ animationDelay: '400ms' }}>
             <button
               onClick={() => exportCSV(location, concern, explanation, envData)}
-              className="flex items-center gap-1.5 px-4 py-2 bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-xl text-sm text-[var(--color-text-secondary)] hover:text-white hover:border-[var(--color-accent)]/50 transition-all hover:shadow-md"
+              className="flex items-center gap-1.5 px-4 py-2 glass-panel rounded-xl text-sm text-[var(--color-text-secondary)] hover:text-white hover:border-[var(--color-accent)]/50 transition-all hover:shadow-[0_0_10px_var(--color-accent)] hover:shadow-[var(--color-accent)]/20"
               aria-label="Export as CSV"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
@@ -290,7 +291,7 @@ export function CurrentFocusPanel({ onDataFetched, initialLocation }: CurrentFoc
             </button>
             <button
               onClick={() => exportJSON(location, concern, explanation, envData)}
-              className="flex items-center gap-1.5 px-4 py-2 bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-xl text-sm text-[var(--color-text-secondary)] hover:text-white hover:border-[var(--color-accent)]/50 transition-all hover:shadow-md"
+              className="flex items-center gap-1.5 px-4 py-2 glass-panel rounded-xl text-sm text-[var(--color-text-secondary)] hover:text-white hover:border-[var(--color-accent)]/50 transition-all hover:shadow-[0_0_10px_var(--color-accent)] hover:shadow-[var(--color-accent)]/20"
               aria-label="Export as JSON"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
@@ -298,7 +299,7 @@ export function CurrentFocusPanel({ onDataFetched, initialLocation }: CurrentFoc
             </button>
             <button
               onClick={() => exportPDF(location, concern, explanation, envData)}
-              className="flex items-center gap-1.5 px-4 py-2 bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-xl text-sm text-[var(--color-text-secondary)] hover:text-white hover:border-[var(--color-accent)]/50 transition-all hover:shadow-md"
+              className="flex items-center gap-1.5 px-4 py-2 glass-panel rounded-xl text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-danger)] hover:border-[var(--color-danger)]/50 transition-all hover:shadow-[0_0_10px_var(--color-danger)] hover:shadow-[var(--color-danger)]/20"
               aria-label="Export as PDF report"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>

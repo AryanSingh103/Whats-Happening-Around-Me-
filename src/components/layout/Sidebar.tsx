@@ -16,25 +16,25 @@ const TABS: { id: ActiveTab; label: string; emoji: string; activeClass: string }
     id: 'current',
     label: 'Current Focus',
     emoji: '🌍',
-    activeClass: 'bg-[var(--color-accent)] text-white shadow-lg shadow-[var(--color-accent)]/20 border-[var(--color-accent)]/30',
+    activeClass: 'bg-[var(--color-accent)]/90 backdrop-blur-md text-white shadow-[0_0_20px_var(--color-accent)] shadow-[var(--color-accent)]/40 border-[var(--color-accent)]/50',
   },
   {
     id: 'compare',
     label: 'Compare Locations',
     emoji: '⚖️',
-    activeClass: 'bg-blue-600 text-white shadow-lg shadow-blue-500/20 border-blue-500/30',
+    activeClass: 'bg-blue-600/90 backdrop-blur-md text-white shadow-[0_0_20px_rgba(37,99,235,0.8)] shadow-blue-500/40 border-blue-500/50',
   },
   {
     id: 'future',
     label: 'Future Simulator',
     emoji: '🔮',
-    activeClass: 'bg-purple-600 text-white shadow-lg shadow-purple-500/20 border-purple-500/30',
+    activeClass: 'bg-purple-600/90 backdrop-blur-md text-white shadow-[0_0_20px_rgba(147,51,234,0.8)] shadow-purple-500/40 border-purple-500/50',
   },
   {
     id: 'chat',
     label: 'Eco-Assistant',
     emoji: '💬',
-    activeClass: 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/20 border-emerald-500/30',
+    activeClass: 'bg-emerald-600/90 backdrop-blur-md text-white shadow-[0_0_20px_rgba(5,150,105,0.8)] shadow-emerald-500/40 border-emerald-500/50',
   },
 ];
 
@@ -42,7 +42,7 @@ export function Sidebar({ activeTab, setActiveTab, theme, toggleTheme, historyCo
   return (
     <>
       {/* ── Desktop Sidebar (always visible) ── */}
-      <aside className="hidden md:flex fixed top-0 left-0 h-full w-[260px] bg-[var(--color-bg-card)] border-r border-[var(--color-border)] z-30 flex-col shadow-xl">
+      <aside className="hidden md:flex fixed top-0 left-0 h-full w-[260px] bg-[var(--color-bg-card)] backdrop-blur-2xl border-r border-[var(--color-border)] z-30 flex-col shadow-[4px_0_24px_rgba(0,0,0,0.15)]">
         <div className="p-6 flex flex-col h-full">
           {/* Branding */}
           <div className="mb-10">
@@ -116,7 +116,7 @@ export function Sidebar({ activeTab, setActiveTab, theme, toggleTheme, historyCo
       </aside>
 
       {/* ── Mobile Bottom Tab Bar ── */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[var(--color-bg-card)]/95 backdrop-blur-xl border-t border-[var(--color-border)] z-40 safe-area-bottom">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[var(--color-bg-card)] backdrop-blur-2xl border-t border-[var(--color-border)] z-40 safe-area-bottom shadow-[0_-4px_24px_rgba(0,0,0,0.15)]">
         <div className="flex items-stretch">
           {TABS.map((tab) => (
             <button
