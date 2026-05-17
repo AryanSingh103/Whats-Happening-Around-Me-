@@ -12,12 +12,8 @@ interface MetricCardProps {
 
 function useAnimatedNumber(target: number, duration: number = 800, delay: number = 0) {
   const [current, setCurrent] = useState(0);
-  const startedRef = useRef(false);
-
   useEffect(() => {
-    if (startedRef.current) return;
-    startedRef.current = true;
-
+    let animationFrameId: number;
     const timeout = setTimeout(() => {
       const startTime = performance.now();
       const animate = (now: number) => {
@@ -25,13 +21,20 @@ function useAnimatedNumber(target: number, duration: number = 800, delay: number
         const progress = Math.min(elapsed / duration, 1);
         // Ease-out cubic
         const eased = 1 - Math.pow(1 - progress, 3);
-        setCurrent(Math.round(target * eased));
-        if (progress < 1) requestAnimationFrame(animate);
+        setCurrent(target * eased);
+        if (progress < 1) {
+          animationFrameId = requestAnimationFrame(animate);
+        } else {
+          setCurrent(target);
+        }
       };
-      requestAnimationFrame(animate);
+      animationFrameId = requestAnimationFrame(animate);
     }, delay);
 
-    return () => clearTimeout(timeout);
+    return () => {
+      clearTimeout(timeout);
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    };
   }, [target, duration, delay]);
 
   return current;
@@ -67,7 +70,7 @@ export function MetricCard({
       <p className={`text-2xl font-bold ${colorClass} transition-all`}>
         {numericValue !== null ? (
           <>
-            {isInteger ? animatedNum : animatedNum.toFixed(1)}
+            {isInteger ? Math.round(animatedNum) : animatedNum.toFixed(1)}
             {suffix}
           </>
         ) : (
