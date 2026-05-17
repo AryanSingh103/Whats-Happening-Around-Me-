@@ -19,6 +19,12 @@ const TABS: { id: ActiveTab; label: string; emoji: string; activeClass: string }
     activeClass: 'bg-[var(--color-accent)] text-white shadow-lg shadow-[var(--color-accent)]/20 border-[var(--color-accent)]/30',
   },
   {
+    id: 'compare',
+    label: 'Compare Locations',
+    emoji: '⚖️',
+    activeClass: 'bg-blue-600 text-white shadow-lg shadow-blue-500/20 border-blue-500/30',
+  },
+  {
     id: 'future',
     label: 'Future Simulator',
     emoji: '🔮',

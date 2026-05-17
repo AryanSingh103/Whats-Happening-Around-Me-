@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import { ActiveTab, EnvironmentData } from '@/types';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { CurrentFocusPanel } from '@/components/current/CurrentFocusPanel';
+import { LocationComparisonPanel } from '@/components/comparison/LocationComparisonPanel';
 import { FutureSimulatorPanel } from '@/components/simulator/FutureSimulatorPanel';
 import { ChatPanel } from '@/components/chat/ChatPanel';
 import { SearchHistoryPanel } from '@/components/history/SearchHistoryPanel';
@@ -55,6 +56,9 @@ export default function Home() {
             {activeTab === 'current' && (
               <>What&apos;s Happening <span className="text-[var(--color-accent)]">Around Me?</span></>
             )}
+            {activeTab === 'compare' && (
+              <>Compare <span className="text-blue-500">Locations</span></>
+            )}
             {activeTab === 'future' && (
               <>Future <span className="text-purple-400">Simulator</span></>
             )}
@@ -64,6 +68,7 @@ export default function Home() {
           </h1>
           <p className="text-[var(--color-text-secondary)] text-lg max-w-xl mx-auto">
             {activeTab === 'current' && 'Understand local environmental conditions with simple, AI-powered explanations.'}
+            {activeTab === 'compare' && 'Compare air quality and climate metrics between two cities side-by-side.'}
             {activeTab === 'future' && 'See what daily life could feel like decades from now under different climate scenarios.'}
             {activeTab === 'chat' && 'Ask questions about climate, weather, and environmental science.'}
           </p>
@@ -74,6 +79,9 @@ export default function Home() {
           <h1 className="text-2xl font-extrabold tracking-tight">
             {activeTab === 'current' && (
               <>What&apos;s Happening <span className="text-[var(--color-accent)]">Around Me?</span></>
+            )}
+            {activeTab === 'compare' && (
+              <>Compare <span className="text-blue-500">Locations</span></>
             )}
             {activeTab === 'future' && (
               <>Future <span className="text-purple-400">Simulator</span></>
@@ -93,6 +101,7 @@ export default function Home() {
             initialLocation={selectedLocation}
           />
         )}
+        {activeTab === 'compare' && <LocationComparisonPanel />}
         {activeTab === 'future' && <FutureSimulatorPanel />}
         {activeTab === 'chat' && <ChatPanel />}
       </div>

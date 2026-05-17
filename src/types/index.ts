@@ -27,7 +27,7 @@ export interface ChatMessage {
   content: string;
 }
 
-export type ActiveTab = 'current' | 'future' | 'chat';
+export type ActiveTab = 'current' | 'compare' | 'future' | 'chat';
 
 export interface Trajectory {
   value: number;
