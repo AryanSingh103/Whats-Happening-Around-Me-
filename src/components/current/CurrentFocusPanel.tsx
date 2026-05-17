@@ -15,18 +15,58 @@ interface CurrentFocusPanelProps {
   initialLocation?: string;
 }
 
+interface Alert {
+  label: string;
+  className: string;
+  icon: string;
+  pulse?: boolean;
+}
+
+function getAlerts(data: EnvironmentData): Alert[] {
+  const alerts: Alert[] = [];
+
+  // AQI alerts
+  if (data.aqi > 200) {
+    alerts.push({ label: 'HAZARDOUS AIR — Stay indoors, close windows', className: 'bg-red-500/15 border-red-500/30 text-red-300', icon: '🫁', pulse: true });
+  } else if (data.aqi > 150) {
+    alerts.push({ label: 'Unhealthy Air — Limit prolonged outdoor activity', className: 'bg-orange-500/15 border-orange-500/30 text-orange-300', icon: '😷' });
+  } else if (data.aqi > 100) {
+    alerts.push({ label: 'Air Quality Caution — Sensitive groups should take care', className: 'bg-yellow-500/15 border-yellow-500/30 text-yellow-300', icon: '⚠️' });
+  }
+
+  // Temperature alerts
+  if (data.temperature >= 40) {
+    alerts.push({ label: 'EXTREME HEAT ADVISORY — Dangerous temperatures, stay hydrated', className: 'bg-red-500/15 border-red-500/30 text-red-300', icon: '🔥', pulse: true });
+  } else if (data.temperature >= 35) {
+    alerts.push({ label: 'Heat Warning — High temperatures, limit sun exposure', className: 'bg-orange-500/15 border-orange-500/30 text-orange-300', icon: '🌡️' });
+  } else if (data.temperature <= -15) {
+    alerts.push({ label: 'EXTREME COLD WARNING — Risk of frostbite, stay warm', className: 'bg-blue-500/15 border-blue-500/30 text-blue-300', icon: '🥶', pulse: true });
+  } else if (data.temperature <= 0) {
+    alerts.push({ label: 'Frost Advisory — Below freezing temperatures', className: 'bg-cyan-500/15 border-cyan-500/30 text-cyan-300', icon: '❄️' });
+  }
+
+  // Wind alerts
+  if (data.windSpeed >= 20) {
+    alerts.push({ label: 'HIGH WIND WARNING — Dangerous wind conditions', className: 'bg-purple-500/15 border-purple-500/30 text-purple-300', icon: '💨', pulse: true });
+  } else if (data.windSpeed >= 10) {
+    alerts.push({ label: 'Wind Advisory — Strong winds expected', className: 'bg-purple-500/15 border-purple-500/30 text-purple-300', icon: '🌬️' });
+  }
+
+  // Humidity alerts
+  if (data.humidity >= 85) {
+    alerts.push({ label: 'Very High Humidity — Outdoor exertion may feel oppressive', className: 'bg-teal-500/15 border-teal-500/30 text-teal-300', icon: '💧' });
+  } else if (data.humidity <= 20) {
+    alerts.push({ label: 'Very Dry Air — Stay hydrated, risk of irritation', className: 'bg-amber-500/15 border-amber-500/30 text-amber-300', icon: '🏜️' });
+  }
+
+  return alerts;
+}
+
 function getAqiColor(aqi: number): string {
   if (aqi <= 50) return 'text-green-400';
   if (aqi <= 100) return 'text-yellow-400';
   if (aqi <= 150) return 'text-orange-400';
   return 'text-red-400';
-}
-
-function getAqiSeverity(aqi: number): { label: string; class: string } | null {
-  if (aqi > 200) return { label: '⚠️ HAZARDOUS — Stay indoors', class: 'bg-red-500/15 border-red-500/30 text-red-300' };
-  if (aqi > 150) return { label: '⚠️ Unhealthy — Limit outdoor activity', class: 'bg-orange-500/15 border-orange-500/30 text-orange-300' };
-  if (aqi > 100) return { label: 'Caution — Sensitive groups affected', class: 'bg-yellow-500/15 border-yellow-500/30 text-yellow-300' };
-  return null;
 }
 
 function getTempColor(temp: number): string {
@@ -35,6 +75,18 @@ function getTempColor(temp: number): string {
   if (temp >= 20) return 'text-yellow-300';
   if (temp >= 10) return 'text-blue-300';
   return 'text-cyan-400';
+}
+
+function getHumidityColor(humidity: number): string {
+  if (humidity >= 85) return 'text-teal-400';
+  if (humidity >= 60) return 'text-blue-300';
+  return 'text-sky-300';
+}
+
+function getWindColor(wind: number): string {
+  if (wind >= 20) return 'text-purple-400';
+  if (wind >= 10) return 'text-violet-300';
+  return 'text-indigo-300';
 }
 
 export function CurrentFocusPanel({ onDataFetched, initialLocation }: CurrentFocusPanelProps) {
@@ -67,7 +119,7 @@ export function CurrentFocusPanel({ onDataFetched, initialLocation }: CurrentFoc
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const aqiSeverity = envData ? getAqiSeverity(envData.aqi) : null;
+  const alerts = envData ? getAlerts(envData) : [];
 
   return (
     <div className="w-full animate-fade-in">
@@ -182,10 +234,19 @@ export function CurrentFocusPanel({ onDataFetched, initialLocation }: CurrentFoc
       {/* ── Results ── */}
       {envData && explanation && (
         <div className="w-full space-y-6">
-          {/* Alert Banner */}
-          {aqiSeverity && (
-            <div className={`w-full p-4 rounded-xl border text-sm font-medium text-center animate-fade-in ${aqiSeverity.class}`}>
-              {aqiSeverity.label}
+          {/* Alert Banners */}
+          {alerts.length > 0 && (
+            <div className="space-y-2">
+              {alerts.map((alert, i) => (
+                <div
+                  key={i}
+                  className={`w-full p-3.5 rounded-xl border text-sm font-medium flex items-center gap-3 animate-fade-in ${alert.className} ${alert.pulse ? 'animate-pulse-soft' : ''}`}
+                  style={{ animationDelay: `${i * 80}ms` }}
+                >
+                  <span className="text-lg shrink-0">{alert.icon}</span>
+                  <span>{alert.label}</span>
+                </div>
+              ))}
             </div>
           )}
 
@@ -193,8 +254,8 @@ export function CurrentFocusPanel({ onDataFetched, initialLocation }: CurrentFoc
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <MetricCard label="Temperature" value={`${Math.round(envData.temperature)}°`} unit="C" colorClass={getTempColor(envData.temperature)} delay={0} />
             <MetricCard label="AQI" value={String(envData.aqi)} colorClass={getAqiColor(envData.aqi)} delay={75} />
-            <MetricCard label="Humidity" value={`${envData.humidity}`} unit="%" delay={150} />
-            <MetricCard label="Wind" value={`${envData.windSpeed}`} unit="m/s" delay={225} />
+            <MetricCard label="Humidity" value={`${envData.humidity}`} unit="%" colorClass={getHumidityColor(envData.humidity)} delay={150} />
+            <MetricCard label="Wind" value={`${envData.windSpeed}`} unit="m/s" colorClass={getWindColor(envData.windSpeed)} delay={225} />
           </div>
 
           {/* Explanation Card */}
