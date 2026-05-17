@@ -8,6 +8,7 @@ import { ErrorBanner } from '@/components/ui/ErrorBanner';
 import { EnvironmentData } from '@/types';
 import { useCallback, useEffect } from 'react';
 import { exportCSV, exportJSON, exportPDF } from '@/lib/export';
+import { HistoricalTrendChart } from './HistoricalTrendChart';
 
 interface CurrentFocusPanelProps {
   envData: EnvironmentData | null;
@@ -273,6 +274,9 @@ export function CurrentFocusPanel({ onDataFetched, initialLocation }: CurrentFoc
               </div>
             </div>
           </div>
+
+          {/* Historical Trend Chart */}
+          <HistoricalTrendChart currentData={envData} />
 
           {/* Export Buttons */}
           <div className="flex flex-wrap gap-2 pt-2 animate-fade-in" style={{ animationDelay: '400ms' }}>
