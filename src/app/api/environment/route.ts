@@ -60,6 +60,8 @@ export async function GET(request: Request) {
       aqi: aqiValue,
       aqiLabel,
       description: weatherData.weather[0]?.description || 'unknown',
+      lat,
+      lon,
     });
     
   } catch (error: any) {

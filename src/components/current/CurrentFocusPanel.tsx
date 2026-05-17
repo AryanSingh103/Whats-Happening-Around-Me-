@@ -6,9 +6,11 @@ import { MetricCard } from '@/components/ui/MetricCard';
 import { LoadingShimmer } from '@/components/ui/LoadingShimmer';
 import { ErrorBanner } from '@/components/ui/ErrorBanner';
 import { EnvironmentData } from '@/types';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { exportCSV, exportJSON, exportPDF } from '@/lib/export';
+import { fetchGeocode } from '@/lib/api';
 import { HistoricalTrendChart } from './HistoricalTrendChart';
+import { Map, Marker } from 'pigeon-maps';
 
 interface CurrentFocusPanelProps {
   envData: EnvironmentData | null;
@@ -106,6 +108,34 @@ export function CurrentFocusPanel({ onDataFetched, initialLocation }: CurrentFoc
     fetchData,
   } = useEnvironmentData(onDataFetched);
 
+  const [mapCenter, setMapCenter] = useState<[number, number]>([40.7128, -74.0060]); // Default to NYC
+  const [mapZoom, setMapZoom] = useState(3);
+  const [isMapLoading, setIsMapLoading] = useState(false);
+
+  // Sync map center if envData provides lat/lon
+  useEffect(() => {
+    if (envData?.lat !== undefined && envData?.lon !== undefined) {
+      setMapCenter([envData.lat, envData.lon]);
+      setMapZoom(11);
+    }
+  }, [envData]);
+
+  const handleMapClick = async ({ latLng }: { latLng: [number, number] }) => {
+    setMapCenter(latLng);
+    setIsMapLoading(true);
+    try {
+      const data = await fetchGeocode(latLng[0], latLng[1]);
+      if (data.error) throw new Error(data.error);
+      setLocation(data.city);
+      await fetchData(data.city);
+      setMapZoom(11);
+    } catch (err: any) {
+      console.error('Map click error:', err);
+    } finally {
+      setIsMapLoading(false);
+    }
+  };
+
   const handleFormSubmit = useCallback(async (e: React.FormEvent) => {
     await handleSubmit(e);
   }, [handleSubmit]);
@@ -127,7 +157,8 @@ export function CurrentFocusPanel({ onDataFetched, initialLocation }: CurrentFoc
       {/* ── Input Card ── */}
       <div className="w-full glass-panel rounded-2xl p-6 md:p-8 mb-8 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none"></div>
-        <form onSubmit={handleFormSubmit} className="flex flex-col md:flex-row gap-4 relative z-10">
+        <div className="flex flex-col gap-6 relative z-10">
+          <form onSubmit={handleFormSubmit} className="flex flex-col md:flex-row gap-4 w-full">
           <div className="flex-1">
             <div className="flex justify-between items-center mb-2">
               <label htmlFor="location-input" className="block text-sm font-medium text-[var(--color-text-muted)]">Where are you?</label>
@@ -156,18 +187,18 @@ export function CurrentFocusPanel({ onDataFetched, initialLocation }: CurrentFoc
               placeholder="e.g. New York, London, Tokyo..."
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              className="w-full bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-white placeholder-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] transition-all"
+              className="w-full bg-[var(--color-bg-input)] border border-white/5 rounded-xl px-4 py-3 text-white placeholder-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] transition-all shadow-inner"
               required
             />
           </div>
 
-          <div className="flex-1 md:max-w-[250px]">
+          <div className="flex-1 md:max-w-[200px]">
             <label htmlFor="concern-select" className="block text-sm font-medium text-[var(--color-text-muted)] mb-2">Top Concern</label>
             <select
               id="concern-select"
               value={concern}
               onChange={(e) => setConcern(e.target.value)}
-              className="w-full bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] transition-all cursor-pointer"
+              className="w-full bg-[var(--color-bg-input)] border border-white/5 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] transition-all cursor-pointer shadow-inner"
             >
               {CONCERNS.map((c) => (
                 <option key={c} value={c}>{c}</option>
@@ -183,8 +214,8 @@ export function CurrentFocusPanel({ onDataFetched, initialLocation }: CurrentFoc
             >
               {loading ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  Checking...
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Loading
                 </>
               ) : (
                 'Explain It'
@@ -192,6 +223,34 @@ export function CurrentFocusPanel({ onDataFetched, initialLocation }: CurrentFoc
             </button>
           </div>
         </form>
+
+          {/* ── Integrated Interactive Map ── */}
+          <div className="w-full flex flex-col gap-2 mt-2">
+            <div className="flex justify-between items-center px-1">
+              <label className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">
+                Interactive Map Selection
+              </label>
+              {isMapLoading && <span className="text-xs text-[var(--color-accent)] animate-pulse">Fetching location...</span>}
+            </div>
+            <div className="w-full h-[180px] md:h-[220px] rounded-xl overflow-hidden border border-white/5 relative bg-[var(--color-bg-input)] group cursor-crosshair shadow-inner">
+              <Map
+                center={mapCenter}
+                zoom={mapZoom}
+                onBoundsChanged={({ center, zoom }) => {
+                  setMapCenter(center);
+                  setMapZoom(zoom);
+                }}
+                onClick={handleMapClick}
+                provider={(x, y, z) => `https://a.tile.openstreetmap.org/${z}/${x}/${y}.png`}
+              >
+                <Marker width={35} anchor={mapCenter} color="var(--color-accent)" />
+              </Map>
+              <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none flex items-center justify-center z-10">
+                <span className="text-white text-sm font-semibold bg-black/60 px-4 py-2 rounded-full backdrop-blur-sm shadow-xl">Click anywhere to detect location</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <ErrorBanner message={error} />

@@ -8,6 +8,8 @@ export interface EnvironmentData {
   aqiLabel: string;
   description: string;
   isDummy?: boolean;
+  lat?: number;
+  lon?: number;
 }
 
 export interface SimMetric {
