@@ -14,7 +14,7 @@ export async function GET(request: Request) {
   if (!OPENWEATHER_API_KEY || !WAQI_API_KEY) {
     // Return dummy data if API keys are not set, so the UI still works
     return NextResponse.json({
-      temperature: 22,
+      temperature: 72,
       humidity: 45,
       windSpeed: 3.5,
       aqi: 65,
@@ -53,8 +53,11 @@ export async function GET(request: Request) {
     else if (aqiValue > 100) aqiLabel = 'Unhealthy for Sensitive Groups';
     else if (aqiValue > 50) aqiLabel = 'Moderate';
 
+    // Convert temperature from Celsius to Fahrenheit
+    const tempInFahrenheit = (weatherData.main.temp * 9) / 5 + 32;
+
     return NextResponse.json({
-      temperature: weatherData.main.temp,
+      temperature: tempInFahrenheit,
       humidity: weatherData.main.humidity,
       windSpeed: weatherData.wind.speed,
       aqi: aqiValue,

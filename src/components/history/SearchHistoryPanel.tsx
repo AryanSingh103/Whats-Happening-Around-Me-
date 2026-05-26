@@ -129,7 +129,7 @@ export function SearchHistoryPanel({
                       {/* Quick metrics */}
                       <div className="flex items-center gap-3 text-xs">
                         <span className="text-[var(--color-text-secondary)]">
-                          {Math.round(entry.data.temperature)}°C
+                          {Math.round(entry.data.temperature)}°F
                         </span>
                         <span className={`px-1.5 py-0.5 rounded border text-[0.65rem] font-medium ${aqiBadge.class}`}>
                           AQI {entry.data.aqi}

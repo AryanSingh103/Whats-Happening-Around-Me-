@@ -38,13 +38,13 @@ function getAlerts(data: EnvironmentData): Alert[] {
   }
 
   // Temperature alerts
-  if (data.temperature >= 40) {
+  if (data.temperature >= 104) {
     alerts.push({ label: 'EXTREME HEAT ADVISORY — Dangerous temperatures, stay hydrated', className: 'bg-red-500/15 border-red-500/30 text-red-300', icon: '🔥', pulse: true });
-  } else if (data.temperature >= 35) {
+  } else if (data.temperature >= 95) {
     alerts.push({ label: 'Heat Warning — High temperatures, limit sun exposure', className: 'bg-orange-500/15 border-orange-500/30 text-orange-300', icon: '🌡️' });
-  } else if (data.temperature <= -15) {
+  } else if (data.temperature <= 5) {
     alerts.push({ label: 'EXTREME COLD WARNING — Risk of frostbite, stay warm', className: 'bg-blue-500/15 border-blue-500/30 text-blue-300', icon: '🥶', pulse: true });
-  } else if (data.temperature <= 0) {
+  } else if (data.temperature <= 32) {
     alerts.push({ label: 'Frost Advisory — Below freezing temperatures', className: 'bg-cyan-500/15 border-cyan-500/30 text-cyan-300', icon: '❄️' });
   }
 
@@ -73,10 +73,10 @@ function getAqiColor(aqi: number): string {
 }
 
 function getTempColor(temp: number): string {
-  if (temp >= 40) return 'text-red-400';
-  if (temp >= 30) return 'text-orange-400';
-  if (temp >= 20) return 'text-yellow-300';
-  if (temp >= 10) return 'text-blue-300';
+  if (temp >= 104) return 'text-red-400';
+  if (temp >= 86) return 'text-orange-400';
+  if (temp >= 68) return 'text-yellow-300';
+  if (temp >= 50) return 'text-blue-300';
   return 'text-cyan-400';
 }
 
@@ -313,7 +313,7 @@ export function CurrentFocusPanel({ onDataFetched, initialLocation }: CurrentFoc
 
           {/* Metric Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <MetricCard label="Temperature" value={`${Math.round(envData.temperature)}°`} unit="C" colorClass={getTempColor(envData.temperature)} delay={0} />
+            <MetricCard label="Temperature" value={`${Math.round(envData.temperature)}°`} unit="F" colorClass={getTempColor(envData.temperature)} delay={0} />
             <MetricCard label="AQI" value={String(envData.aqi)} colorClass={getAqiColor(envData.aqi)} delay={75} />
             <MetricCard label="Humidity" value={`${envData.humidity}`} unit="%" colorClass={getHumidityColor(envData.humidity)} delay={150} />
             <MetricCard label="Wind" value={`${envData.windSpeed}`} unit="m/s" colorClass={getWindColor(envData.windSpeed)} delay={225} />

@@ -35,7 +35,7 @@ export function exportCSV(
     ['Location', location],
     ['Timestamp', new Date().toLocaleString()],
     ['Top Concern', concern],
-    ['Temperature (°C)', String(data.temperature)],
+    ['Temperature (°F)', String(data.temperature)],
     ['AQI', String(data.aqi)],
     ['AQI Label', data.aqiLabel],
     ['Humidity (%)', String(data.humidity)],
@@ -179,7 +179,7 @@ export function exportPDF(
   <div class="metrics">
     <div class="metric">
       <div class="label">Temperature</div>
-      <div class="value">${Math.round(data.temperature)}°<span class="unit">C</span></div>
+      <div class="value">${Math.round(data.temperature)}°<span class="unit">F</span></div>
     </div>
     <div class="metric">
       <div class="label">Air Quality</div>

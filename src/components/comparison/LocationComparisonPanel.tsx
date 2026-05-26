@@ -13,10 +13,10 @@ function getAqiColor(aqi: number): string {
 }
 
 function getTempColor(temp: number): string {
-  if (temp >= 40) return 'text-red-400';
-  if (temp >= 30) return 'text-orange-400';
-  if (temp >= 20) return 'text-yellow-300';
-  if (temp >= 10) return 'text-blue-300';
+  if (temp >= 104) return 'text-red-400';
+  if (temp >= 86) return 'text-orange-400';
+  if (temp >= 68) return 'text-yellow-300';
+  if (temp >= 50) return 'text-blue-300';
   return 'text-cyan-400';
 }
 
@@ -107,7 +107,7 @@ export function LocationComparisonPanel() {
             <div className="space-y-4 animate-slide-in-right">
               <h3 className="text-xl font-bold text-white mb-2">{loc1.location}</h3>
               <div className="grid grid-cols-2 gap-4">
-                <MetricCard label="Temp" value={`${Math.round(loc1.envData.temperature)}°`} unit="C" colorClass={getTempColor(loc1.envData.temperature)} />
+                <MetricCard label="Temp" value={`${Math.round(loc1.envData.temperature)}°`} unit="F" colorClass={getTempColor(loc1.envData.temperature)} />
                 <MetricCard label="AQI" value={String(loc1.envData.aqi)} colorClass={getAqiColor(loc1.envData.aqi)} />
                 <MetricCard label="Humidity" value={`${loc1.envData.humidity}`} unit="%" colorClass={getHumidityColor(loc1.envData.humidity)} />
                 <MetricCard label="Wind" value={`${loc1.envData.windSpeed}`} unit="m/s" colorClass={getWindColor(loc1.envData.windSpeed)} />
@@ -138,7 +138,7 @@ export function LocationComparisonPanel() {
             <div className="space-y-4 animate-slide-in-right" style={{ animationDelay: '100ms' }}>
               <h3 className="text-xl font-bold text-white mb-2">{loc2.location}</h3>
               <div className="grid grid-cols-2 gap-4">
-                <MetricCard label="Temp" value={`${Math.round(loc2.envData.temperature)}°`} unit="C" colorClass={getTempColor(loc2.envData.temperature)} />
+                <MetricCard label="Temp" value={`${Math.round(loc2.envData.temperature)}°`} unit="F" colorClass={getTempColor(loc2.envData.temperature)} />
                 <MetricCard label="AQI" value={String(loc2.envData.aqi)} colorClass={getAqiColor(loc2.envData.aqi)} />
                 <MetricCard label="Humidity" value={`${loc2.envData.humidity}`} unit="%" colorClass={getHumidityColor(loc2.envData.humidity)} />
                 <MetricCard label="Wind" value={`${loc2.envData.windSpeed}`} unit="m/s" colorClass={getWindColor(loc2.envData.windSpeed)} />

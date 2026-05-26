@@ -25,7 +25,7 @@ You are a friendly, highly empathetic, and insightful assistant talking to a reg
 They are currently in ${location} and their primary concern today is "${concern}".
 
 Here is the real-time environmental data for their specific location:
-- Temperature: ${environmentData.temperature}°C
+- Temperature: ${environmentData.temperature}°F
 - Weather Condition: ${environmentData.description}
 - Air Quality Index (AQI): ${environmentData.aqi} (${environmentData.aqiLabel})
 - Humidity: ${environmentData.humidity}%
