@@ -43,9 +43,29 @@ export function LocationComparisonPanel() {
         <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none"></div>
         {/* Location 1 Input */}
         <div className="space-y-4 relative z-10">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <span>📍</span> Location A
-          </h2>
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+              <span>📍</span> Location A
+            </h2>
+            <button
+              type="button"
+              onClick={loc1.handleLocateMe}
+              disabled={loc1.isLocating}
+              className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors disabled:opacity-50 cursor-pointer"
+              aria-label="Detect Location A"
+            >
+              {loc1.isLocating ? (
+                <>
+                  <div className="w-3 h-3 border border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                  Locating...
+                </>
+              ) : (
+                <>
+                  <span>📍</span> Detect Location
+                </>
+              )}
+            </button>
+          </div>
           <form onSubmit={loc1.handleSubmit} className="flex gap-2">
             <input
               type="text"
@@ -67,9 +87,29 @@ export function LocationComparisonPanel() {
 
         {/* Location 2 Input */}
         <div className="space-y-4 md:border-l md:border-[var(--color-border)] md:pl-6 relative z-10">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <span>📍</span> Location B
-          </h2>
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+              <span>📍</span> Location B
+            </h2>
+            <button
+              type="button"
+              onClick={loc2.handleLocateMe}
+              disabled={loc2.isLocating}
+              className="text-xs text-purple-400 hover:text-purple-300 flex items-center gap-1 transition-colors disabled:opacity-50 cursor-pointer"
+              aria-label="Detect Location B"
+            >
+              {loc2.isLocating ? (
+                <>
+                  <div className="w-3 h-3 border border-purple-400 border-t-transparent rounded-full animate-spin"></div>
+                  Locating...
+                </>
+              ) : (
+                <>
+                  <span>📍</span> Detect Location
+                </>
+              )}
+            </button>
+          </div>
           <form onSubmit={loc2.handleSubmit} className="flex gap-2">
             <input
               type="text"
