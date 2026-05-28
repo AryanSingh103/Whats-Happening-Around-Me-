@@ -96,8 +96,7 @@ export async function fetchExplanation(
 }
 
 export async function fetchSimulation(params: {
-  currentAge: number;
-  futureAge: number;
+  yearsInFuture: number;
   city: string;
   scenario: string;
   trajectory: string;

@@ -13,13 +13,9 @@ export function FutureSimulatorPanel() {
       <div className="w-full bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-2xl p-6 md:p-8 shadow-2xl mb-8">
         <form onSubmit={sim.handleSubmit} className="flex flex-col gap-6">
           <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 md:max-w-[120px]">
-              <label htmlFor="current-age" className="block text-sm font-medium text-[var(--color-text-muted)] mb-2">Current Age</label>
-              <input id="current-age" type="number" min="1" max="120" placeholder="e.g. 15" value={sim.currentAge} onChange={(e) => sim.setCurrentAge(e.target.valueAsNumber || '')} className="w-full bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-white placeholder-[var(--color-text-muted)] focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all" required />
-            </div>
-            <div className="flex-1 md:max-w-[120px]">
-              <label htmlFor="future-age" className="block text-sm font-medium text-[var(--color-text-muted)] mb-2">Future Age</label>
-              <input id="future-age" type="number" min="1" max="120" placeholder="e.g. 45" value={sim.simAge} onChange={(e) => sim.setSimAge(e.target.valueAsNumber || '')} className="w-full bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-white placeholder-[var(--color-text-muted)] focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all" required />
+            <div className="flex-1 md:max-w-[160px]">
+              <label htmlFor="years-in-future" className="block text-sm font-medium text-[var(--color-text-muted)] mb-2">Years in Future</label>
+              <input id="years-in-future" type="number" min="1" max="100" placeholder="e.g. 30" value={sim.yearsInFuture} onChange={(e) => sim.setYearsInFuture(e.target.valueAsNumber || '')} className="w-full bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-white placeholder-[var(--color-text-muted)] focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all" required />
             </div>
             <div className="flex-1">
               <label htmlFor="sim-city" className="block text-sm font-medium text-[var(--color-text-muted)] mb-2">City</label>
@@ -46,7 +42,7 @@ export function FutureSimulatorPanel() {
           </div>
 
           <div className="flex justify-center mt-2">
-            <button type="submit" disabled={sim.simLoading || !sim.simCity.trim() || !sim.simAge || !sim.currentAge || sim.simAge <= sim.currentAge} className="w-full md:w-auto bg-purple-600 hover:bg-purple-500 text-white font-semibold py-3 px-10 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-purple-500/20 active:scale-[0.98]">
+            <button type="submit" disabled={sim.simLoading || !sim.simCity.trim() || !sim.yearsInFuture || sim.yearsInFuture <= 0} className="w-full md:w-auto bg-purple-600 hover:bg-purple-500 text-white font-semibold py-3 px-10 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-purple-500/20 active:scale-[0.98]">
               {sim.simLoading ? (<><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>Simulating...</>) : (<>🔮 Glimpse the Future</>)}
             </button>
           </div>
@@ -59,7 +55,7 @@ export function FutureSimulatorPanel() {
         <div className="w-full text-center py-16 animate-fade-in">
           <div className="text-6xl mb-6">🔮</div>
           <h3 className="text-xl font-semibold text-white mb-2">See Your Future</h3>
-          <p className="text-[var(--color-text-secondary)] max-w-md mx-auto">Enter your age, a city, and an environmental scenario to see an AI-generated projection of what daily life could feel like decades from now.</p>
+          <p className="text-[var(--color-text-secondary)] max-w-md mx-auto">Enter how many years into the future you want to look, a city, and an environmental scenario to see an AI-generated projection of what daily life could feel like.</p>
         </div>
       )}
 
@@ -74,7 +70,7 @@ export function FutureSimulatorPanel() {
             <div className="flex items-start gap-4">
               <div className="bg-purple-500 text-white p-2.5 rounded-lg shrink-0 shadow-lg shadow-purple-500/20">🔮</div>
               <div className="w-full">
-                <h3 className="text-xl font-bold text-white mb-3">Life in {sim.simFutureYear} (At Age {sim.simAge})</h3>
+                <h3 className="text-xl font-bold text-white mb-3">Life in {sim.simFutureYear} ({sim.yearsInFuture} Years from Now)</h3>
                 <p className="text-purple-100/90 leading-relaxed text-lg whitespace-pre-wrap">{sim.simData.story}</p>
               </div>
             </div>

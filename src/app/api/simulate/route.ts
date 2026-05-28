@@ -3,15 +3,14 @@ import { NextResponse } from 'next/server';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { currentAge, futureAge, city, scenario, trajectory } = body;
+    const { yearsInFuture, city, scenario, trajectory } = body;
 
-    if (!currentAge || !futureAge || !city || !scenario || !trajectory) {
+    if (!yearsInFuture || !city || !scenario || !trajectory) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const yearsInFuture = futureAge - currentAge;
     if (yearsInFuture <= 0) {
-      return NextResponse.json({ error: 'Future age must be greater than current age' }, { status: 400 });
+      return NextResponse.json({ error: 'Years into the future must be greater than 0' }, { status: 400 });
     }
 
     const futureYear = new Date().getFullYear() + yearsInFuture;
@@ -28,8 +27,8 @@ export async function POST(request: Request) {
 
     const prompt = `
 You are a highly advanced climate forecasting AI simulating the profound future impact of environmental changes on human life.
-The user is currently ${currentAge} years old, living right now in ${city}.
-They are asking you to gaze into the future and tell them exactly what their daily physical life will feel like ${yearsInFuture} years from now, in the year ${futureYear}, when they turn ${futureAge} years old.
+The user is living right now in ${city}.
+They are asking you to gaze into the future and tell them exactly what daily physical life will feel like ${yearsInFuture} years from now, in the year ${futureYear}.
 They are highly focused on this specific environmental threat: "${scenario}".
 
 The world is currently locked onto the following trajectory: "${trajectory}". 
@@ -40,7 +39,7 @@ Your response must be striking, personal, and scientifically plausible.
 You MUST respond in strict JSON format without any markdown wrappers outside the JSON string.
 Structure your JSON exclusively like this:
 {
-  "story": "A deeply vivid, 2-3 sentence story in the second person ('You') about a routine moment in their daily life that highlights the physical changes. Make it feel real and immersive, showing—not just telling—how much the city has transformed.",
+  "story": "A deeply vivid, 2-3 sentence story in the second person ('You') about a routine moment in daily life that highlights the physical changes. Make it feel real and immersive, showing—not just telling—how much the city has transformed.",
   "metrics": [
     {
       "name": "Name of Metric (e.g. Summer Highs, Unhealthy AQI Days, Sea Level)",

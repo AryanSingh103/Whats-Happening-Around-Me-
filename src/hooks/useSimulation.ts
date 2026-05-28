@@ -6,8 +6,7 @@ import { SCENARIOS, TRAJECTORIES } from '@/lib/constants';
 import { fetchSimulation } from '@/lib/api';
 
 export function useSimulation() {
-  const [currentAge, setCurrentAge] = useState<number | ''>('');
-  const [simAge, setSimAge] = useState<number | ''>('');
+  const [yearsInFuture, setYearsInFuture] = useState<number | ''>(30);
   const [simCity, setSimCity] = useState('');
   const [simScenario, setSimScenario] = useState(SCENARIOS[0]);
   const [simTrajectory, setSimTrajectory] = useState(2);
@@ -19,13 +18,9 @@ export function useSimulation() {
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!simCity.trim() || !simAge || !currentAge || simAge <= currentAge) {
-      if (
-        typeof simAge === 'number' &&
-        typeof currentAge === 'number' &&
-        simAge <= currentAge
-      ) {
-        setSimError('Future Age must be greater than Current Age.');
+    if (!simCity.trim() || !yearsInFuture || yearsInFuture <= 0) {
+      if (typeof yearsInFuture === 'number' && yearsInFuture <= 0) {
+        setSimError('Years into the future must be greater than 0.');
       }
       return;
     }
@@ -41,8 +36,7 @@ export function useSimulation() {
 
     try {
       const json = await fetchSimulation({
-        currentAge: currentAge as number,
-        futureAge: simAge as number,
+        yearsInFuture: yearsInFuture as number,
         city: simCity,
         scenario: simScenario,
         trajectory: trajectoryLabel || 'Current Path',
@@ -54,13 +48,11 @@ export function useSimulation() {
     } finally {
       setSimLoading(false);
     }
-  }, [simCity, simAge, currentAge, simScenario, simTrajectory]);
+  }, [simCity, yearsInFuture, simScenario, simTrajectory]);
 
   return {
-    currentAge,
-    setCurrentAge,
-    simAge,
-    setSimAge,
+    yearsInFuture,
+    setYearsInFuture,
     simCity,
     setSimCity,
     simScenario,
