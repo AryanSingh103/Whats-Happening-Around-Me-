@@ -19,6 +19,8 @@ export default function Home() {
   // Key to force re-mount of CurrentFocusPanel when a history entry is selected
   const [panelKey, setPanelKey] = useState(0);
   const [selectedLocation, setSelectedLocation] = useState<string | undefined>();
+  // Pre-filled message for chat when coming from simulator
+  const [chatInitialMessage, setChatInitialMessage] = useState<string | undefined>();
 
   const handleDataFetched = useCallback(
     (location: string, concern: string, data: EnvironmentData) => {
@@ -33,6 +35,14 @@ export default function Home() {
       setPanelKey((k) => k + 1);
       setActiveTab('current');
       setHistoryOpen(false);
+    },
+    []
+  );
+
+  const handleConsultChat = useCallback(
+    (message: string) => {
+      setChatInitialMessage(message);
+      setActiveTab('chat');
     },
     []
   );
@@ -106,8 +116,8 @@ export default function Home() {
           />
         )}
         {activeTab === 'compare' && <LocationComparisonPanel />}
-        {activeTab === 'future' && <FutureSimulatorPanel />}
-        {activeTab === 'chat' && <ChatPanel />}
+        {activeTab === 'future' && <FutureSimulatorPanel onConsultChat={handleConsultChat} />}
+        {activeTab === 'chat' && <ChatPanel initialMessage={chatInitialMessage} onInitialMessageConsumed={() => setChatInitialMessage(undefined)} />}
       </div>
 
       {/* Search History Panel */}

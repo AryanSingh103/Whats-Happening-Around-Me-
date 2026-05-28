@@ -10,6 +10,8 @@ import { useState, useEffect } from 'react';
 interface ChatPanelProps {
   envData?: EnvironmentData | null;
   location?: string;
+  initialMessage?: string;
+  onInitialMessageConsumed?: () => void;
 }
 
 function getMessageText(msg: any): string {
@@ -60,9 +62,19 @@ function getFollowUps(messages: any[]): string[] {
   return FOLLOW_UP_SUGGESTIONS.general;
 }
 
-export function ChatPanel({ envData, location }: ChatPanelProps) {
+export function ChatPanel({ envData, location, initialMessage, onInitialMessageConsumed }: ChatPanelProps) {
   const chat = useChat(envData);
   const [followUps, setFollowUps] = useState<string[]>([]);
+
+  // Auto-send initial message from simulator integration
+  useEffect(() => {
+    if (initialMessage && !chat.isLoading) {
+      chat.sendMessage(initialMessage);
+      onInitialMessageConsumed?.();
+    }
+    // Only trigger when initialMessage changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialMessage]);
 
   // Update follow-ups when messages change and we're not loading
   useEffect(() => {
