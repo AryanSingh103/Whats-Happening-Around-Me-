@@ -6,6 +6,8 @@ import { EnvironmentData } from '@/types';
 import { exportChat } from '@/lib/export';
 import ReactMarkdown from 'react-markdown';
 import { useState, useEffect } from 'react';
+import { QueryHistoryPanel } from './QueryHistoryPanel';
+import { useQueryHistory } from '@/hooks/useQueryHistory';
 
 interface ChatPanelProps {
   envData?: EnvironmentData | null;
@@ -63,8 +65,10 @@ function getFollowUps(messages: any[]): string[] {
 }
 
 export function ChatPanel({ envData, location, initialMessage, onInitialMessageConsumed }: ChatPanelProps) {
-  const chat = useChat(envData);
+  const chat = useChat(envData, location);
   const [followUps, setFollowUps] = useState<string[]>([]);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const { queries, clearQueries, downloadQueriesCsv } = useQueryHistory();
 
   // Auto-send initial message from simulator integration
   useEffect(() => {
@@ -124,6 +128,13 @@ export function ChatPanel({ envData, location, initialMessage, onInitialMessageC
             Export
           </button>
         )}
+        <button
+          onClick={() => setIsHistoryOpen(true)}
+          className={`${chat.messages.length > 1 ? 'ml-2' : 'ml-auto'} text-xs bg-emerald-500/10 text-emerald-300 px-3 py-1.5 rounded-full border border-emerald-500/30 hover:bg-emerald-500/20 transition-colors flex items-center gap-1`}
+          aria-label="Query History"
+        >
+          <span>🗄️</span> History
+        </button>
       </div>
 
       {/* Messages */}
@@ -245,6 +256,14 @@ export function ChatPanel({ envData, location, initialMessage, onInitialMessageC
           </button>
         </form>
       </div>
+
+      <QueryHistoryPanel
+        queries={queries}
+        isOpen={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
+        onClear={clearQueries}
+        onDownload={downloadQueriesCsv}
+      />
     </div>
   );
 }

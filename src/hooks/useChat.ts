@@ -18,7 +18,9 @@ const WELCOME_MESSAGE = {
   createdAt: new Date(),
 };
 
-export function useChat(contextData?: any) {
+import { useQueryHistory } from './useQueryHistory';
+
+export function useChat(contextData?: any, locationContext?: string) {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -53,22 +55,26 @@ export function useChat(contextData?: any) {
   const isLoading = status === 'submitted' || status === 'streaming';
   const isStreaming = status === 'streaming';
 
+  const { addQuery } = useQueryHistory();
+
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
       if (!input.trim() || isLoading) return;
       sendMessage({ text: input });
+      addQuery(input, locationContext);
       setInput('');
     },
-    [input, isLoading, sendMessage]
+    [input, isLoading, sendMessage, addQuery, locationContext]
   );
 
   const handleSendMessage = useCallback(
     (text: string) => {
       if (!text.trim() || isLoading) return;
       sendMessage({ text });
+      addQuery(text, locationContext);
     },
-    [isLoading, sendMessage]
+    [isLoading, sendMessage, addQuery, locationContext]
   );
 
   return {
